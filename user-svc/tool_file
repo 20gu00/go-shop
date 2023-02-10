@@ -1,4 +1,4 @@
 user-svc 用户相关的微服务
 global 全局对象
-handler 业务处理代码
+service 业务处理代码
 model 对应数据表结构

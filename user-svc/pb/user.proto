@@ -2,7 +2,7 @@ syntax="proto3";
 
 import "google/protobuf/empty.proto";
 
-option go_package=".;pb";
+option go_package="./;pb";
 
 // 页数 页码
 // 自动转换成大写开头
