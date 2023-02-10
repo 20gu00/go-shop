@@ -49,6 +49,7 @@ type UserDao interface {
 	Paginate(pNum, pSize int) []User
 	GetUserByMobile(mobile string) (User, *gorm.DB)
 	GetUserById(id int32) (User, *gorm.DB)
+	CreateUser(user *User) *gorm.DB
 }
 
 func NewUserDao() UserDao {
@@ -81,8 +82,15 @@ func (u *User) GetUserByMobile(mobile string) (User, *gorm.DB) {
 }
 
 func (u *User) GetUserById(id int32) (User, *gorm.DB) {
+	// 考虑清楚是否直接使用接受者指针
 	var user User
 	// 指针
 	result := dao.DB.Where(&User{Base: Base{ID: id}}).First(&user)
 	return user, result
+}
+
+func (u *User) CreateUser(user *User) *gorm.DB {
+	// 指针
+	result := dao.DB.Create(user)
+	return result
 }

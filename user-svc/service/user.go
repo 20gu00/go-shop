@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	salt_passwd "go-shop/user-svc/global/salt-passwd"
 	"go-shop/user-svc/model"
 	"go-shop/user-svc/pb"
 	"google.golang.org/grpc/codes"
@@ -50,7 +51,7 @@ func Model2Res(user model.User) pb.UserInfo {
 }
 
 // 通过mobile查询用户
-func GetUserByMobile(ctx context.Context, req *pb.Mobile) (rsp *pb.UserInfo, err error) {
+func (u *UserServer) GetUserByMobile(ctx context.Context, req *pb.Mobile) (rsp *pb.UserInfo, err error) {
 	userDao := model.NewUserDao()
 	user, result := userDao.GetUserByMobile(req.Mobile)
 	if result.RowsAffected == 0 {
@@ -67,7 +68,7 @@ func GetUserByMobile(ctx context.Context, req *pb.Mobile) (rsp *pb.UserInfo, err
 }
 
 // 通过id查找用户
-func GetUserById(ctx context.Context, req *pb.Id) (res *pb.UserInfo, error) {
+func (u *UserServer) GetUserById(ctx context.Context, req *pb.Id) (res *pb.UserInfo, err error) {
 	userDao := model.NewUserDao()
 	user, result := userDao.GetUserById(req.Id)
 	if result.RowsAffected == 0 {
@@ -77,6 +78,30 @@ func GetUserById(ctx context.Context, req *pb.Id) (res *pb.UserInfo, error) {
 	// 其他错误,比如数据库连接不上等
 	if result.Error != nil {
 		return nil, result.Error
+	}
+
+	userInfo := Model2Res(user)
+	return &userInfo, nil
+}
+
+// 创建用户
+func (u *UserServer) CreateUser(ctx context.Context, req *pb.CreateUserInfo) (res *pb.UserInfo, err error) {
+	userDao := model.NewUserDao()
+	user, result := userDao.GetUserByMobile(req.Mobile)
+	if result.RowsAffected == 1 {
+		return nil, status.Errorf(codes.AlreadyExists, "用户已存在")
+	}
+
+	// 没有查询到,填充user
+	user.NickName = req.Nickname
+	user.Mobile = req.Mobile
+
+	user.Password = salt_passwd.SaltPassword(req.Password)
+
+	// 创建用户
+	result = userDao.CreateUser(&user)
+	if result.Error != nil {
+		return nil, status.Errorf(codes.Internal, result.Error.Error())
 	}
 
 	userInfo := Model2Res(user)
