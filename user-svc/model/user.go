@@ -1,6 +1,7 @@
 package model
 
 import (
+	"go-shop/user-svc/dao"
 	"gorm.io/gorm"
 	"time"
 )
@@ -35,4 +36,23 @@ type User struct {
 	Gender string `gorm:"column:gender;default:male;type:varchar(6) comment 'male表示男性,female表示女性'"`
 	// 简单权限
 	Role int `grom:"column:role;default:1;type:int comment '1表示普通用户,2表示管理员'"`
+}
+
+// users
+//func TableName()string{
+//	return "users"
+//}
+
+type UserDao interface {
+	GetUserList() []User
+}
+
+func NewUserDao() UserDao {
+	return &User{} // 指针最好,跟接收器一致
+}
+
+func (u *User) GetUserList() []User {
+	var userList []User
+	dao.DB.Find(&userList)
+	return userList
 }

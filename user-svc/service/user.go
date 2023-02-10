@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"go-shop/user-svc/model"
 	"go-shop/user-svc/pb"
 )
 
@@ -10,5 +11,7 @@ type UserServer struct{}
 
 // 获取用户列表
 func (u *UserServer) GetUserList(context.Context, *pb.PageInfo) (*pb.UserListRes, error) {
+	userDao := model.NewUserDao()
+	userList := userDao.GetUserList()
 
 }
