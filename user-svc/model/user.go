@@ -24,7 +24,8 @@ type User struct {
 	// 可以根据mobile查找,创建个索引针对表数据多的情况快速索引 11位
 	// 两个索引 normal索引idx_mobile和unique索引
 	Mobile string `gorm:"index:idx_mobile;unique;type:varchar(11);not null"`
-	// 加盐加密
+	// 加盐加密  对称加密 非对称加密(公钥私钥)  md5摘要算法(不可反解)(即使是开发者也不知道用户实际密码,只能输入密码加密后比对)
+	// 不加盐可以暴力破击,就是通过一张彩虹表将常见的密码和对应的md5值记录下来
 	Password string `gorm:"type:varchar(250);not null"`
 	// 昵称可以为空
 	NickName string `gorm:"type:varchar(20)"`
