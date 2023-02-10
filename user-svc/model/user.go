@@ -50,7 +50,7 @@ type UserDao interface {
 	GetUserByMobile(mobile string) (User, *gorm.DB)
 	GetUserById(id int32) (User, *gorm.DB)
 	CreateUser(user *User) *gorm.DB
-	UpdateUser(user *User) *grom.DB
+	UpdateUser(user *User) *gorm.DB
 }
 
 func NewUserDao() UserDao {
@@ -58,7 +58,10 @@ func NewUserDao() UserDao {
 }
 
 func (u *User) GetUserList() ([]User, int32, error) {
-	var userList []User
+	// [] 注意空指针
+	//var userList []User
+	//userList := []User{}
+	userList := make([]User, 0)
 	result := dao.DB.Find(&userList)
 	if result.Error != nil {
 		return nil, 0, result.Error
@@ -69,7 +72,8 @@ func (u *User) GetUserList() ([]User, int32, error) {
 }
 
 func (u *User) Paginate(pNum, pSize int) []User {
-	var userPaginate []User
+	//var userPaginate []User
+	userPaginate := make([]User, 0)
 	// 使用gorm的scope
 	dao.DB.Scopes(paginate_list.Paginate(pNum, pSize)).Find(&userPaginate)
 	return userPaginate

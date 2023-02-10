@@ -12,12 +12,15 @@ import (
 )
 
 // user grpc service
-type UserServer struct{}
+type UserServer struct {
+	// 实现mustEmbedUnimplementedUserServer
+	*pb.UnimplementedUserServer
+}
 
 // 获取用户列表
 func (u *UserServer) GetUserList(ctx context.Context, req *pb.PageInfo) (rsp *pb.UserListRes, err error) {
 	userDao := model.NewUserDao()
-	userList, total, err := userDao.GetUserList()
+	_, total, err := userDao.GetUserList()
 	if err != nil {
 		return nil, err
 	}

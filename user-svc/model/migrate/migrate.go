@@ -4,6 +4,9 @@
 package main
 
 import (
+	"crypto/sha512"
+	"fmt"
+	"github.com/anaskhan96/go-password-encoder"
 	"gorm.io/gorm/schema"
 	"log"
 	"os"
@@ -49,4 +52,19 @@ func main() {
 
 	// 默认users
 	db.AutoMigrate(model.User{})
+
+	options := &password.Options{16, 100, 30, sha512.New}
+	salt, encodedPwd := password.Encode("admin12345", options)
+	newPassword := fmt.Sprintf("$pbkdf2-sha512$%s$%s", salt, encodedPwd)
+
+	// 批量注入写数据
+	for i := 0; i < 10; i++ {
+		user := model.User{
+			NickName: fmt.Sprintf("用户%d", i),
+			Mobile:   fmt.Sprintf("12345678%d", i),
+			Gender:   "Male",
+			Password: newPassword,
+		}
+		db.Save(&user)
+	}
 }
