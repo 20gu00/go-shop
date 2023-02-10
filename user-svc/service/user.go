@@ -26,6 +26,7 @@ func (u *UserServer) GetUserList(ctx context.Context, req *pb.PageInfo) (rsp *pb
 		return nil, err
 	}
 
+	// 初始化
 	res := &pb.UserListRes{}
 	res.Total = total
 
@@ -33,9 +34,10 @@ func (u *UserServer) GetUserList(ctx context.Context, req *pb.PageInfo) (rsp *pb
 	userPaginate := userDao.Paginate(int(req.PNum), int(req.PSize))
 	for _, user := range userPaginate {
 		userInfoRes := Model2Res(user)
-		rsp.UserListData = append(rsp.UserListData, &userInfoRes)
+		// 使用切片要注意是否已经初始化也就是分配内存地址,不要使用rsp
+		res.UserListData = append(res.UserListData, &userInfoRes)
 	}
-	return rsp, nil
+	return res, nil
 }
 
 func Model2Res(user model.User) pb.UserInfo {

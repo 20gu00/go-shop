@@ -7,7 +7,6 @@ import (
 	"crypto/sha512"
 	"fmt"
 	"github.com/anaskhan96/go-password-encoder"
-	"gorm.io/gorm/schema"
 	"log"
 	"os"
 	"time"
@@ -42,9 +41,9 @@ func main() {
 	// 建立连接
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
 		Logger: gormLogger,
-		NamingStrategy: schema.NamingStrategy{
-			SingularTable: true, // 不用加s后缀
-		},
+		//NamingStrategy: schema.NamingStrategy{
+		//	SingularTable: true, // 不用加s后缀
+		//},
 	})
 	if err != nil {
 		panic(err)

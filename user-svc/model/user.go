@@ -42,7 +42,7 @@ type User struct {
 // users
 func (*User) TableName() string {
 	//返回表名
-	return "user"
+	return "users"
 }
 
 type UserDao interface {

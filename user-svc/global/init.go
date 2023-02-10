@@ -1,7 +1,11 @@
 package global
 
-import "go-shop/user-svc/dao"
+import (
+	"go-shop/user-svc/dao"
+	"go-shop/user-svc/model"
+)
 
-func init() {
+func Init() {
 	dao.InitMysql()
+	dao.DB.AutoMigrate(model.User{})
 }

@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"go-shop/user-svc/global"
 	"go-shop/user-svc/model"
 	"go-shop/user-svc/pb"
 	"go-shop/user-svc/service"
@@ -18,6 +19,7 @@ func main() {
 
 	flag.Parse()
 
+	global.Init()
 	//userDao := model.NewUserDao()
 	userDao := &model.User{}
 	r, t, e := userDao.GetUserList()
