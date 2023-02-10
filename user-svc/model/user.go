@@ -2,6 +2,7 @@ package model
 
 import (
 	"go-shop/user-svc/dao"
+	paginate_list "go-shop/user-svc/global/paginate-list"
 	"gorm.io/gorm"
 	"time"
 )
@@ -44,15 +45,28 @@ type User struct {
 //}
 
 type UserDao interface {
-	GetUserList() []User
+	GetUserList() ([]User, int32, error)
+	Paginate(pNum, pSize int) []User
 }
 
 func NewUserDao() UserDao {
 	return &User{} // 指针最好,跟接收器一致
 }
 
-func (u *User) GetUserList() []User {
+func (u *User) GetUserList() ([]User, int32, error) {
 	var userList []User
-	dao.DB.Find(&userList)
-	return userList
+	result := dao.DB.Find(&userList)
+	if result.Error != nil {
+		return nil, 0, result.Error
+	}
+
+	total := int32(result.RowsAffected)
+	return userList, total, nil
+}
+
+func (u *User) Paginate(pNum, pSize int) []User {
+	var userPaginate []User
+	// 使用gorm的scope
+	dao.DB.Scopes(paginate_list.Paginate(pNum, pSize)).Find(&userPaginate)
+	return userPaginate
 }
