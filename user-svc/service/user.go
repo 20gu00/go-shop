@@ -19,6 +19,7 @@ type UserServer struct {
 
 // 获取用户列表
 func (u *UserServer) GetUserList(ctx context.Context, req *pb.PageInfo) (rsp *pb.UserListRes, err error) {
+	//userDao := model.NewUserDao()
 	userDao := model.NewUserDao()
 	_, total, err := userDao.GetUserList()
 	if err != nil {
@@ -74,6 +75,7 @@ func (u *UserServer) GetUserByMobile(ctx context.Context, req *pb.Mobile) (rsp *
 
 // 通过id查找用户
 func (u *UserServer) GetUserById(ctx context.Context, req *pb.Id) (res *pb.UserInfo, err error) {
+	//userDao := model.NewUserDao()
 	userDao := model.NewUserDao()
 	user, result := userDao.GetUserById(req.Id)
 	if result.RowsAffected == 0 {

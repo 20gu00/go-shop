@@ -36,6 +36,7 @@ func InitMysql() {
 	var err error
 	DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{
 		Logger: gormLogger,
+		// 最好不要
 		NamingStrategy: schema.NamingStrategy{
 			SingularTable: true, // 不用加s后缀
 		},

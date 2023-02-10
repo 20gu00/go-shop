@@ -1,13 +1,19 @@
-package model
+package main
 
+//引入orm包时，需要同时引入驱动包
+//"gorm.io/driver/mysql"就是gorm，mysql的驱动包
 import (
-	"go-shop/user-svc/dao"
-	paginate_list "go-shop/user-svc/global/paginate-list"
+	"fmt"
+	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"time"
 )
 
-// 公用字段 不使用gorm的默认model
+var DB *gorm.DB
+
+//表对应的struct
+//大写 gorm才能操作grom标签的
+//不一定全都要写gorm标签
 type Base struct {
 	ID int32 `gorm:"primarykey"`
 	// 这三个时间在数据库中生成的表都是datetime
@@ -40,70 +46,52 @@ type User struct {
 }
 
 // users
-func (*User) TableName() string {
-	//返回表名
-	return "user"
-}
+//func TableName()string{
+//	return "users"
+//}
 
 type UserDao interface {
 	GetUserList() ([]User, int32, error)
-	Paginate(pNum, pSize int) []User
-	GetUserByMobile(mobile string) (User, *gorm.DB)
-	GetUserById(id int32) (User, *gorm.DB)
-	CreateUser(user *User) *gorm.DB
-	UpdateUser(user *User) *gorm.DB
+	//Paginate(pNum, pSize int) []User
+	//GetUserByMobile(mobile string) (User, *gorm.DB)
+	//GetUserById(id int32) (User, *gorm.DB)
+	//CreateUser(user *User) *gorm.DB
+	//UpdateUser(user *User) *gorm.DB
 }
 
 func NewUserDao() UserDao {
 	return &User{} // 指针最好,跟接收器一致
 }
 
+//自定义表名
+func (*User) TableName() string {
+	//返回表名
+	return "user"
+}
+
+//数据库初始化
+func main() {
+	dsn := "root:Dl123456@tcp(127.0.0.1:13306)/go_shop?charset=utf8&parseTime=True&loc=Local"
+	//建立连接
+	var err error
+	DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	if err != nil {
+		panic(err)
+	}
+	user := NewUserDao()
+	r, t, e := user.GetUserList()
+	fmt.Println(r, t, e)
+}
 func (u *User) GetUserList() ([]User, int32, error) {
 	// [] 注意空指针
 	//var userList []User
 	//userList := []User{}
 	userList := make([]User, 0)
-	//Table()
-	result := dao.DB.Find(&userList)
+	result := DB.Find(&userList)
 	if result.Error != nil {
 		return nil, 0, result.Error
 	}
 
 	total := int32(result.RowsAffected)
 	return userList, total, nil
-}
-
-func (u *User) Paginate(pNum, pSize int) []User {
-	//var userPaginate []User
-	userPaginate := make([]User, 0)
-	// 使用gorm的scope
-	dao.DB.Scopes(paginate_list.Paginate(pNum, pSize)).Find(&userPaginate)
-	return userPaginate
-}
-
-func (u *User) GetUserByMobile(mobile string) (User, *gorm.DB) {
-	var user User
-	// 指针
-	result := dao.DB.Where(&User{Mobile: mobile}).First(&user)
-	return user, result
-}
-
-func (u *User) GetUserById(id int32) (User, *gorm.DB) {
-	// 考虑清楚是否直接使用接受者指针
-	var user User
-	// 指针
-	result := dao.DB.Where(&User{Base: Base{ID: id}}).First(&user)
-	return user, result
-}
-
-func (u *User) CreateUser(user *User) *gorm.DB {
-	// 指针
-	result := dao.DB.Create(user)
-	return result
-}
-
-func (u *User) UpdateUser(user *User) *gorm.DB {
-	// 指针
-	result := dao.DB.Save(user)
-	return result
 }

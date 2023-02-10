@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"go-shop/user-svc/model"
 	"go-shop/user-svc/pb"
 	"go-shop/user-svc/service"
 	"google.golang.org/grpc"
@@ -17,6 +18,10 @@ func main() {
 
 	flag.Parse()
 
+	//userDao := model.NewUserDao()
+	userDao := &model.User{}
+	r, t, e := userDao.GetUserList()
+	fmt.Println(r, t, e)
 	// 创建server
 	server := grpc.NewServer()
 
