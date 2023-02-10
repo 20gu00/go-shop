@@ -31,7 +31,7 @@ type User struct {
 	Password string `gorm:"type:varchar(250);not null"`
 	// 昵称可以为空
 	NickName string `gorm:"type:varchar(20)"`
-	// 指针,不容易gorm出错
+	// 指针,不容易gorm出错   数据库是datetime
 	Birthday *time.Time `gorm:"type:datetime"`
 	// type后面加comment
 	Gender string `gorm:"column:gender;default:male;type:varchar(6) comment 'male表示男性,female表示女性'"`
@@ -50,6 +50,7 @@ type UserDao interface {
 	GetUserByMobile(mobile string) (User, *gorm.DB)
 	GetUserById(id int32) (User, *gorm.DB)
 	CreateUser(user *User) *gorm.DB
+	UpdateUser(user *User) *grom.DB
 }
 
 func NewUserDao() UserDao {
@@ -92,5 +93,11 @@ func (u *User) GetUserById(id int32) (User, *gorm.DB) {
 func (u *User) CreateUser(user *User) *gorm.DB {
 	// 指针
 	result := dao.DB.Create(user)
+	return result
+}
+
+func (u *User) UpdateUser(user *User) *gorm.DB {
+	// 指针
+	result := dao.DB.Save(user)
 	return result
 }

@@ -2,11 +2,13 @@ package service
 
 import (
 	"context"
+	"github.com/golang/protobuf/ptypes/empty"
 	salt_passwd "go-shop/user-svc/global/salt-passwd"
 	"go-shop/user-svc/model"
 	"go-shop/user-svc/pb"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"time"
 )
 
 // user grpc service
@@ -106,4 +108,26 @@ func (u *UserServer) CreateUser(ctx context.Context, req *pb.CreateUserInfo) (re
 
 	userInfo := Model2Res(user)
 	return &userInfo, nil
+}
+
+// 用户个人中心更新用户
+func (u *UserServer) UpdateUser(ctx context.Context, req *pb.UpdateUserInfo) (*empty.Empty, error) {
+	userDao := model.NewUserDao()
+	user, result := userDao.GetUserById(req.Id)
+	if result.RowsAffected == 0 {
+		return nil, status.Errorf(codes.NotFound, "用户不存在")
+	}
+
+	// 时间戳->time
+	birthday := time.Unix(int64(req.Birthday), 0)
+	user.Birthday = &birthday
+	user.NickName = req.Nickname
+	user.Gender = req.Gender
+
+	result = userDao.UpdateUser(&user)
+	if result.Error != nil {
+		return nil, status.Errorf(codes.Internal, result.Error.Error())
+	}
+
+	return &empty.Empty{}, nil
 }
