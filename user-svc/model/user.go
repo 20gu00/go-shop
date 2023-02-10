@@ -47,6 +47,8 @@ type User struct {
 type UserDao interface {
 	GetUserList() ([]User, int32, error)
 	Paginate(pNum, pSize int) []User
+	GetUserByMobile(mobile string) (User, *gorm.DB)
+	GetUserById(id int32) (User, *gorm.DB)
 }
 
 func NewUserDao() UserDao {
@@ -69,4 +71,18 @@ func (u *User) Paginate(pNum, pSize int) []User {
 	// 使用gorm的scope
 	dao.DB.Scopes(paginate_list.Paginate(pNum, pSize)).Find(&userPaginate)
 	return userPaginate
+}
+
+func (u *User) GetUserByMobile(mobile string) (User, *gorm.DB) {
+	var user User
+	// 指针
+	result := dao.DB.Where(&User{Mobile: mobile}).First(&user)
+	return user, result
+}
+
+func (u *User) GetUserById(id int32) (User, *gorm.DB) {
+	var user User
+	// 指针
+	result := dao.DB.Where(&User{Base: Base{ID: id}}).First(&user)
+	return user, result
 }
