@@ -131,3 +131,11 @@ func (u *UserServer) UpdateUser(ctx context.Context, req *pb.UpdateUserInfo) (*e
 
 	return &empty.Empty{}, nil
 }
+
+// 检查用户密码
+func (u *UserServer) ValidatePassword(ctx context.Context, req *pb.PasswordInfo) (*pb.ValidateRes, error) {
+	check := salt_passwd.ParsePassword(req.Password, req.EncryptedPassword)
+	return &pb.ValidateRes{
+		Success: check,
+	}, nil
+}

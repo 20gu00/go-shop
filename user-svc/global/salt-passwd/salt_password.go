@@ -36,9 +36,12 @@ func SaltPassword(passwd string) string {
 }
 
 // 判断密码
-func ParsePassword(passwd, newPasswd string) bool {
+func ParsePassword(passwd, encryptedPasswd string) bool {
+	// passwd原始的密码 encryptedPasswd加密后的密码
+
+	// 和加密的option一致
 	options := &password.Options{16, 100, 30, sha512.New}
-	newPasswdInfo := strings.Split(newPasswd, "$")
-	check := password.Verify(passwd, newPasswdInfo[2], newPasswdInfo[3], options)
+	encryptedPasswdInfo := strings.Split(encryptedPasswd, "$")
+	check := password.Verify(passwd, encryptedPasswdInfo[2], encryptedPasswdInfo[3], options)
 	return check
 }
