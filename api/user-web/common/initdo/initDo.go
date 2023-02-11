@@ -2,8 +2,12 @@ package initdo
 
 import (
 	"fmt"
+	"github.com/gin-gonic/gin/binding"
+	ut "github.com/go-playground/universal-translator"
+	"github.com/go-playground/validator/v10"
 	"time"
 	"user-web/common"
+	"user-web/common/validators"
 
 	"go.uber.org/zap"
 
@@ -50,6 +54,19 @@ func InitDO(ch chan int) {
 	if err := common.InitTrans("zh"); err != nil {
 		fmt.Printf("初始化validator翻译器失败, err:%v\n", err)
 		return
+	}
+
+	// 自定义的验证规则(验证器)和注册翻译器
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		// 定义tag类似min等
+		v.RegisterValidation("mobile", validators.ValidatorMobile)
+		// 翻译器,输出提示信息的定义
+		_ := v.RegisterTranslation("mobile", common.Trans, func(ut ut.Translator) error {
+			return ut.Add("mobile", "{0} 手机号码格式不正确!", true)
+		}, func(ut ut.Translator, fe validator.FieldError) string {
+			t, _ := ut.T("mobile", fe.Field())
+			return t
+		})
 	}
 
 	<-ch
