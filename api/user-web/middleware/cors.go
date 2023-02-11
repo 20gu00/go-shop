@@ -7,6 +7,7 @@ import (
 )
 
 // 处理跨域请求,支持options访问
+// 跨域是前后端模式的常见问题,可以后端解决
 func Cors() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		//获取请求方法
