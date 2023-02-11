@@ -7,3 +7,15 @@
 {"level":"INFO","time":"2023-02-11T14:10:56.997+0800","caller":"logger-zap/logger.go:102","msg":"/user/list","status":200,"method":"GET","path":"/user/list","query":"","ip":"127.0.0.1","user-agent":"curl/7.29.0","errors":"","cost":0.013122201}
 {"level":"INFO","time":"2023-02-11T14:13:47.624+0800","caller":"user-web/main.go:54","msg":"[Info] web server启动失败","error":"http: Server closed"}
 {"level":"INFO","time":"2023-02-11T14:13:47.626+0800","caller":"user-web/main.go:70","msg":"server退出了"}
+{"level":"INFO","time":"2023-02-11T15:39:35.651+0800","caller":"logger-zap/logger.go:53","msg":"初始化logger完成"}
+{"level":"INFO","time":"2023-02-11T15:39:35.664+0800","caller":"user-web/main.go:47","msg":"[Info]","程序名称":"user-web","程序版本":"v1","server port":8080}
+{"level":"INFO","time":"2023-02-11T15:40:54.153+0800","caller":"user-web/main.go:54","msg":"[Info] web server启动失败","error":"http: Server closed"}
+{"level":"INFO","time":"2023-02-11T15:40:54.154+0800","caller":"user-web/main.go:70","msg":"server退出了"}
+{"level":"INFO","time":"2023-02-11T15:48:17.817+0800","caller":"logger-zap/logger.go:53","msg":"初始化logger完成"}
+{"level":"INFO","time":"2023-02-11T15:48:47.293+0800","caller":"logger-zap/logger.go:102","msg":"/user/list","status":200,"method":"GET","path":"/user/list","query":"","ip":"127.0.0.1","user-agent":"curl/7.29.0","errors":"","cost":0.009067001}
+{"level":"INFO","time":"2023-02-11T15:57:07.075+0800","caller":"user-web/main.go:54","msg":"[Info] web server启动失败","error":"http: Server closed"}
+{"level":"INFO","time":"2023-02-11T15:57:07.078+0800","caller":"user-web/main.go:70","msg":"server退出了"}
+{"level":"INFO","time":"2023-02-11T16:28:16.120+0800","caller":"logger-zap/logger.go:53","msg":"初始化logger完成"}
+{"level":"INFO","time":"2023-02-11T16:28:16.124+0800","caller":"user-web/main.go:47","msg":"[Info]","程序名称":"user-web","程序版本":"v1","server port":8080}
+{"level":"INFO","time":"2023-02-11T16:31:48.505+0800","caller":"user-web/main.go:54","msg":"[Info] web server启动失败","error":"http: Server closed"}
+{"level":"INFO","time":"2023-02-11T16:31:48.506+0800","caller":"user-web/main.go:70","msg":"server退出了"}

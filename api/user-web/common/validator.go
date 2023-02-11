@@ -18,6 +18,7 @@ import (
 var Trans ut.Translator
 
 // InitTrans 初始化翻译器
+// 针对json
 func InitTrans(locale string) (err error) {
 	// 修改gin框架中的Validator引擎属性，实现自定制
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
