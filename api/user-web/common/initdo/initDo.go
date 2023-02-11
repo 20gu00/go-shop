@@ -61,7 +61,7 @@ func InitDO(ch chan int) {
 		// 定义tag类似min等
 		v.RegisterValidation("mobile", validators.ValidatorMobile)
 		// 翻译器,输出提示信息的定义
-		_ := v.RegisterTranslation("mobile", common.Trans, func(ut ut.Translator) error {
+		_ = v.RegisterTranslation("mobile", common.Trans, func(ut ut.Translator) error {
 			return ut.Add("mobile", "{0} 手机号码格式不正确!", true)
 		}, func(ut ut.Translator, fe validator.FieldError) string {
 			t, _ := ut.T("mobile", fe.Field())

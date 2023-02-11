@@ -13,6 +13,7 @@ import (
 	"strconv"
 	"time"
 	"user-web/common"
+	"user-web/common/jwt"
 	user2 "user-web/model/user"
 	"user-web/pb"
 )
@@ -71,9 +72,6 @@ func UserPasswdLogin(ctx *gin.Context) {
 				})
 			} else {
 				if res2.Success {
-					ctx.JSON(http.StatusOK, gin.H{
-						"msg": "登陆成功",
-					})
 					/* cookie和session机制实现登录状态
 						   流程:
 						   		1.浏览器访问请求服务端,登录
@@ -98,6 +96,20 @@ func UserPasswdLogin(ctx *gin.Context) {
 
 					*/
 
+					///生成token
+					token, err := jwt.GenToken(uint(res.Id), uint(res.Role), res.Nickname)
+					if err != nil {
+						ctx.JSON(http.StatusInternalServerError, gin.H{
+							"msg": "token生成失败",
+						})
+						return
+					}
+					ctx.JSON(http.StatusOK, gin.H{
+						"msg":      "登陆成功",
+						"id":       res.Id,
+						"token":    token, // 主要还是通过解析token来获取信息
+						"Nickname": res.Nickname,
+					})
 				} else {
 					ctx.JSON(http.StatusOK, gin.H{
 						"msg": "登录失败",
