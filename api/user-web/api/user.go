@@ -17,6 +17,18 @@ import (
 	"user-web/pb"
 )
 
+var userClient pb.UserClient
+
+func init() {
+	// 方便开发,暂时直接写,viper已经做好了,也可以通过viper来做这些配置信息
+	conn, err := grpc.Dial("127.0.0.1:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		zap.L().Error("[ GetUserList ]连接grpc server失败", zap.Error(err))
+	}
+
+	userClient = pb.NewUserClient(conn)
+}
+
 // 用户登录(api层做即可,调用依赖的rpc)
 func UserPasswdLogin(ctx *gin.Context) {
 	// 使用validate做参数规则教研,当然也可以自己写
@@ -27,18 +39,53 @@ func UserPasswdLogin(ctx *gin.Context) {
 		ValidateParam(ctx, err)
 		return
 	}
+
+	// logic
+	res, err := userClient.GetUserByMobile(context.Background(), &pb.Mobile{
+		Mobile: param.Mobile,
+	})
+	if err != nil {
+		err2, ok := status.FromError(err)
+		if ok {
+			switch err2.Code() {
+			case codes.NotFound:
+				ctx.JSON(http.StatusBadRequest, gin.H{
+					"msg": "用户不存在",
+				})
+			default:
+				ctx.JSON(http.StatusInternalServerError, gin.H{
+					"msg": "登录失败",
+				})
+			}
+			return
+		} else {
+			// 用户存在,检查密码是否正确的
+			if res2, err2 := userClient.ValidatePassword(context.Background(), &pb.PasswordInfo{
+				// 原始密码
+				Password: param.Password,
+				// 加密密码
+				EncryptedPassword: res.Password,
+			}); err2 != nil {
+				ctx.JSON(http.StatusInternalServerError, gin.H{
+					"msg": "登录失败",
+				})
+			} else {
+				if res2.Success {
+					ctx.JSON(http.StatusOK, gin.H{
+						"msg": "登陆成功",
+					})
+				} else {
+					ctx.JSON(http.StatusOK, gin.H{
+						"msg": "登录失败",
+					})
+				}
+			}
+		}
+	}
 }
 
 // 获取用户列表
 func GetUserList(ctx *gin.Context) {
-	// 方便开发,暂时直接写,viper已经做好了,也可以通过viper来做这些配置信息
-	conn, err := grpc.Dial("127.0.0.1:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
-	if err != nil {
-		zap.L().Error("[ GetUserList ]连接grpc server失败", zap.Error(err))
-	}
-
-	userClient := pb.NewUserClient(conn)
-
 	// 获取参数 ShouldBindJSON  (json传参)
 	// 设置query参数
 	pNum, _ := strconv.Atoi(ctx.DefaultQuery("pnum", "0"))
