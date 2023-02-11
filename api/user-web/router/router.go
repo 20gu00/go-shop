@@ -29,6 +29,7 @@ func InitRouter() *gin.Engine {
 
 	// metrics
 	r.GET("/metrics", gin.WrapH(promhttp.Handler()))
+
 	SetupRouter(r)
 	return r
 }
