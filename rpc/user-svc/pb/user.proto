@@ -1,0 +1,76 @@
+syntax="proto3";
+
+import "google/protobuf/empty.proto";
+
+option go_package="./;pb";
+
+// 页数 页码
+// 自动转换成大写开头
+message PageInfo{
+  uint32 pNum=1;
+  uint32 pSize=2;
+}
+
+message UserInfo{
+  int32 id=1;
+  string password=2;
+  string mobile=3;
+  string nickname=4;
+  // 时间 非负,范围更大
+  uint32 birthday=5;
+  string gender=6;
+  int32 role=7;
+}
+
+message UserListRes{
+  int32 total=1;
+  repeated UserInfo userListData=2;
+}
+
+message Mobile{
+  string mobile=1;
+}
+
+message Id{
+  int32 id=1;
+}
+
+message CreateUserInfo{
+  string nickname=1;
+  string mobile=2;
+  string password=3;
+  string gender=4;
+}
+
+message UpdateUserInfo{
+  int32 id=1;
+  string nickname=2;
+  string gender=3;
+  uint64 birthday=4;
+}
+
+message PasswordInfo{
+  // 原始密码和加密后的密码,做校验
+  string password=1;
+  string encryptedPassword=2;
+}
+
+message ValidateRes{
+  bool success=1;
+}
+
+// User服务
+service User{
+  //获取用户列表方法
+  rpc GetUserList(PageInfo) returns (UserListRes);
+  // 通过手机号码查询用户
+  rpc GetUserByMobile(Mobile)returns(UserInfo);
+  // 通过id查询用户
+  rpc GetUserById(Id)returns(UserInfo);
+  // 创建用户
+  rpc CreateUser(CreateUserInfo)returns(UserInfo);
+  // 更新用户
+  rpc UpdateUser(UpdateUserInfo)returns(google.protobuf.Empty);
+  // 密码校验接口,不和业务逻辑耦合,拿出来做成一个通用接口
+  rpc ValidatePassword(PasswordInfo)returns(ValidateRes);
+}
