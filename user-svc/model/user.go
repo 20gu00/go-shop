@@ -1,10 +1,12 @@
 package model
 
 import (
+	"time"
+
 	"go-shop/user-svc/dao"
 	paginate_list "go-shop/user-svc/global/paginate-list"
+
 	"gorm.io/gorm"
-	"time"
 )
 
 // 公用字段 不使用gorm的默认model
@@ -13,7 +15,7 @@ type Base struct {
 	// 这三个时间在数据库中生成的表都是datetime
 	CreatedAt time.Time      `gorm:"column:add_time"` // add_time 数据库字段列名称
 	UpdatedAt time.Time      `gorm:"column:update_time"`
-	DeletedAt gorm.DeletedAt // 默认列名  gorm.Model
+	DeletedAt gorm.DeletedAt // 默认列名  gorm.Model   默认查找时多一个and deleted_at is null的条件
 
 	// 不用gorm操作,仅在代码中使用,标记是否删除
 	IsDelete bool

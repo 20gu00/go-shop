@@ -39,6 +39,7 @@ message CreateUserInfo{
   string nickname=1;
   string mobile=2;
   string password=3;
+  string gender=4;
 }
 
 message UpdateUserInfo{

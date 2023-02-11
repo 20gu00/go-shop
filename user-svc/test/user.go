@@ -33,7 +33,7 @@ func Init() {
 func TestGetUserList() {
 	res, err := userClient.GetUserList(context.Background(), &pb.PageInfo{
 		PNum:  1,
-		PSize: 10, // 获取10条数据
+		PSize: 2, // 获取10条数据
 	})
 	if err != nil {
 		panic(err)
@@ -55,9 +55,32 @@ func TestGetUserList() {
 	}
 }
 
+func TestCreateUser() {
+	//options := &password.Options{16, 100, 30, sha512.New}
+	//salt, encodedPwd := password.Encode("admin12345", options)
+	//newPassword := fmt.Sprintf("$pbkdf2-sha512$%s$%s", salt, encodedPwd)
+
+	for i := 190; i < 195; i++ {
+		rsp, err := userClient.CreateUser(context.Background(), &pb.CreateUserInfo{
+			Nickname: fmt.Sprintf("用户%d", i),
+			Mobile:   fmt.Sprintf("12345678%d", i),
+			Password: "admin12345", // 传递明文密码,由服务端加密设置了 newPassword,
+			Gender:   "Male",
+		})
+		// 要处理server返回的错误
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println(rsp.Id)
+	}
+
+}
+
 func main() {
 	// 前提是grpc server启动
 	Init()
-	TestGetUserList()
-	defer conn.Close()
+	//TestGetUserList()
+	TestCreateUser()
+	//defer conn.Close()
+	conn.Close()
 }

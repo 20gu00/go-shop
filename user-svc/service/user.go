@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"github.com/golang/protobuf/ptypes/empty"
 	salt_passwd "go-shop/user-svc/global/salt-passwd"
 	"go-shop/user-svc/model"
@@ -47,6 +48,7 @@ func Model2Res(user model.User) pb.UserInfo {
 		Password: user.Password,
 		Gender:   user.Gender,
 		Role:     int32(user.Role),
+
 		// grpc的message的结构体的字段由默认值,不能随意将nil赋值进去,序列化的时候会异常
 		// 搞清楚哪些字段是由默认值,birthday一开始可能为空
 		// Birthday: user.Birthday
@@ -77,7 +79,6 @@ func (u *UserServer) GetUserByMobile(ctx context.Context, req *pb.Mobile) (rsp *
 
 // 通过id查找用户
 func (u *UserServer) GetUserById(ctx context.Context, req *pb.Id) (res *pb.UserInfo, err error) {
-	//userDao := model.NewUserDao()
 	userDao := model.NewUserDao()
 	user, result := userDao.GetUserById(req.Id)
 	if result.RowsAffected == 0 {
@@ -95,25 +96,34 @@ func (u *UserServer) GetUserById(ctx context.Context, req *pb.Id) (res *pb.UserI
 
 // 创建用户
 func (u *UserServer) CreateUser(ctx context.Context, req *pb.CreateUserInfo) (res *pb.UserInfo, err error) {
+	// 远程调用很多server的拦截器fmt.Println都不是server上输出了
+
 	userDao := model.NewUserDao()
 	user, result := userDao.GetUserByMobile(req.Mobile)
 	if result.RowsAffected == 1 {
+		// 服务端最好也打印或者日志一下,不然这里return,客户端那边报错退出,相关的错误信息较少
+		fmt.Println("用户存在")
 		return nil, status.Errorf(codes.AlreadyExists, "用户已存在")
 	}
 
+	fmt.Println("1", user.ID) // 1,0
 	// 没有查询到,填充user
 	user.NickName = req.Nickname
 	user.Mobile = req.Mobile
 
 	user.Password = salt_passwd.SaltPassword(req.Password)
 
+	fmt.Println("90", user.ID) //90 0
 	// 创建用户
+	// 注意create时,该结构体会拿到id,主建
 	result = userDao.CreateUser(&user)
 	if result.Error != nil {
 		return nil, status.Errorf(codes.Internal, result.Error.Error())
 	}
 
+	fmt.Println("2", user.ID) //2,41  会拿到当前记录的id,即使创建的时候没有输入id,主建
 	userInfo := Model2Res(user)
+	fmt.Println("3", userInfo.Id) //3,41
 	return &userInfo, nil
 }
 
