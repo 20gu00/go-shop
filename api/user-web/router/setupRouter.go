@@ -14,5 +14,5 @@ func SetupRouter(r *gin.Engine) {
 
 	com := r.Group("/com")
 	com.GET("/captcha", api.GetCaptcha)
+	com.POST("/sms", api.Sms)
 }
-
