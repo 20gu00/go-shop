@@ -74,6 +74,30 @@ func UserPasswdLogin(ctx *gin.Context) {
 					ctx.JSON(http.StatusOK, gin.H{
 						"msg": "登陆成功",
 					})
+					/* cookie和session机制实现登录状态
+						   流程:
+						   		1.浏览器访问请求服务端,登录
+								2.服务端查询数据库中的用户
+								3.数据库返回用户信息给服务端
+								4.服务端针对这个用户创建一个session和sessionid会保存到数据库中
+								5.将sessionid返回给浏览器,设置到cookie中
+								6.后续浏览器请求都会带上这个sessionid
+								7.服务端通过sessionid确定用户状态和从数据库中获取用户相关信息
+						   在微服务中的问题:
+						其实sessionid其实就是用来让服务端获取出相应用户的信息
+						比如浏览器从用户微服务中获取sessionid,然后它带着这个sessionid去访问商品微服务,而商品微服务的数据哭中没用用户信息,那么它应该去用户微服务的数据库中获取,单微服务应该是独立的,或者你可以用一个公用的数据库
+						比如用redis而不是mysql来存放session信息,用作公用数据库,这就是分布式session,那么这个redis就要去扛住高并发
+
+					json web token在微服务中更好用
+						两点功能:身份验证和信息交换
+						加密的jwt字符串
+						各个微服务服务端加密 解密,浏览器不能解密
+						使用同样的key加密解密即可
+						token加解密来判断信息即可,不用像session一样在本地存储
+						token一般放在header中
+
+					*/
+
 				} else {
 					ctx.JSON(http.StatusOK, gin.H{
 						"msg": "登录失败",
