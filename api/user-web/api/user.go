@@ -122,6 +122,12 @@ func UserPasswdLogin(ctx *gin.Context) {
 
 // 获取用户列表
 func GetUserList(ctx *gin.Context) {
+	claim, _ := ctx.Get("claim")
+	user, ok := claim.(jwt.MyClaims)
+	if !ok {
+		zap.L().Error("context的claim断言失败")
+	}
+	zap.L().Info("访问的用户: ", zap.Int("userId", int(user.ID)))
 	// 获取参数 ShouldBindJSON  (json传参)
 	// 设置query参数
 	pNum, _ := strconv.Atoi(ctx.DefaultQuery("pnum", "0"))

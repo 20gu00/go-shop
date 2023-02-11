@@ -2,6 +2,7 @@ package router
 
 import (
 	"net/http"
+	"user-web/middleware"
 
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -31,5 +32,9 @@ func InitRouter() *gin.Engine {
 	r.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
 	SetupRouter(r)
+	r.Use(
+		middleware.Cors(),
+		middleware.JWTMiddleware(),
+	)
 	return r
 }
