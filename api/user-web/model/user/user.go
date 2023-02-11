@@ -5,6 +5,9 @@ package user
 type UserPasswdLoginForm struct {
 	Mobile   string `json:"mobile" form:"mobile" binding:"required,mobile"`           // 自定义手机号码验证规则
 	Password string `json:"password" form:"password" binding:"required,min=3,max=50"` // 逗号之间不能有空格,最少3个最大50个
+	// 验证码相关的
+	Captcha   string `json:"captcha" form:"captcha" binding:"required,min=5,max=5"` //最长最短都是5,就是id5
+	CaptchaId string `json:"captcha_id" form:"captcha_id" binding:"required"`
 }
 
 // 获取用户列表的响应

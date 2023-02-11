@@ -41,6 +41,16 @@ func UserPasswdLogin(ctx *gin.Context) {
 		return
 	}
 
+	// 先进行验证码验证逻辑(机器人身份等)
+	// 验证码id 验证码 是否清理掉(就是填写了验证码进行了一次访问,就不能用同一个验证码在次访问,要刷新)
+	// postman访问时就是带上captcha接口的验证码id和验证码(前端根据captcha接口得到验证码id和验证码,然后提供验证码的空格让用户输入)
+	if !captchaStore.Verify(param.CaptchaId, param.Captcha, true) {
+		// 验证失败
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"msg": "验证码错误",
+		})
+		return
+	}
 	// logic
 	res, err := userClient.GetUserByMobile(context.Background(), &pb.Mobile{
 		Mobile: param.Mobile,
