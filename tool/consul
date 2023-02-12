@@ -55,3 +55,5 @@ go的consul库来实现服务的注册 健康检查 发现
 将rpc中的服务注册进consul中,api层通过consul去服务发现rpc
 
 grpc的健康检查不像gin等web,要调用相应的接口
+
+rpc层主要是通过consul实现服务注册,api层主要是服务注册和服务发现
