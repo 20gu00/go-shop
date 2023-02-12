@@ -4,6 +4,9 @@ import (
 	"flag"
 	"fmt"
 	"google.golang.org/grpc"
+
+	"google.golang.org/grpc/health"
+	"google.golang.org/grpc/health/grpc_health_v1"
 	"net"
 	"user-rpc/common/setUp/config"
 	"user-rpc/global"
@@ -37,6 +40,9 @@ func main() {
 
 	// 注册user service
 	pb.RegisterUserServer(server, &service.UserServer{})
+	// 注册健康检查
+	srv := health.NewServer()
+	grpc_health_v1.RegisterHealthServer(server, srv)
 
 	// 建立连接
 	// ip port 服务提供的地址,监听的地址
