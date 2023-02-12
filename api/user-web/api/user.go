@@ -14,6 +14,7 @@ import (
 	"time"
 	"user-web/common"
 	"user-web/common/jwt"
+	"user-web/dao/redis"
 	user2 "user-web/model/user"
 	"user-web/pb"
 )
@@ -177,6 +178,63 @@ func GetUserList(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, resWeb)
+}
+
+// 用户注册逻辑
+func RegisterUser(ctx *gin.Context) {
+	param := user2.UserRegisterInput{}
+	// json方式获取参数
+	if err := ctx.ShouldBindJSON(&param); err != nil {
+		// ctx 指针
+		ValidateParam(ctx, err)
+		return
+	}
+
+	// 验证码校验
+	// 验证码生成接口已经将验证码保存进redis
+	v, err := redis.GetSmsCode(param.Mobile)
+	if err != nil {
+		zap.L().Error("通过手机号码从redis获取验证码失败")
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"msg": err,
+		})
+	} else {
+		if v != param.SmsCode {
+			zap.L().Error("验证码校验错误")
+			ctx.JSON(http.StatusBadRequest, gin.H{
+				"msg": err.Error() + "验证码校验错误",
+			})
+		}
+		return
+	}
+
+	// 注册用户
+	user, err := userClient.CreateUser(context.Background(), &pb.CreateUserInfo{
+		Nickname: param.Mobile,
+		Mobile:   param.Mobile,
+		Password: param.Password,
+	})
+	if err != nil {
+		zap.S().Errorf("[ RegisterUser ]新建用户失败: %s", ctx)
+		GrpcErrorToHttp(err, ctx)
+		return
+	}
+
+	// 如果是注册即可登录,设置token
+	token, err := jwt.GenToken(uint(user.Id), uint(user.Role), user.Nickname)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"msg": "token生成失败",
+		})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{
+		"msg":      "登陆成功",
+		"id":       user.Id,
+		"token":    token, // 主要还是通过解析token来获取信息
+		"Nickname": user.Nickname,
+	})
+
 }
 
 // grpc错误转换成http错误

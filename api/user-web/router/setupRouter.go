@@ -9,10 +9,12 @@ import (
 func SetupRouter(r *gin.Engine) {
 	user := r.Group("/user")
 
+	user.POST("register", api.RegisterUser)
 	user.GET("/list", middleware.AdminMiddleware(), api.GetUserList)
 	user.POST("/user_pwd_login", api.UserPasswdLogin)
 
 	com := r.Group("/com")
+
 	com.GET("/captcha", api.GetCaptcha)
 	com.POST("/sms", api.Sms)
 }

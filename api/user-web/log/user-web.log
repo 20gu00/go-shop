@@ -4,3 +4,7 @@
 {"level":"INFO","time":"2023-02-12T12:10:12.054+0800","caller":"user-web/main.go:47","msg":"[Info]","程序名称":"user-web","程序版本":"v1","server port":8080}
 {"level":"INFO","time":"2023-02-12T12:11:09.199+0800","caller":"user-web/main.go:54","msg":"[Info] web server启动失败","error":"http: Server closed"}
 {"level":"INFO","time":"2023-02-12T12:11:09.203+0800","caller":"user-web/main.go:70","msg":"server退出了"}
+{"level":"INFO","time":"2023-02-12T13:54:12.220+0800","caller":"logger-zap/logger.go:53","msg":"初始化logger完成"}
+{"level":"INFO","time":"2023-02-12T13:54:12.221+0800","caller":"user-web/main.go:47","msg":"[Info]","程序名称":"user-web","程序版本":"v1","server port":8080}
+{"level":"INFO","time":"2023-02-12T13:55:20.506+0800","caller":"user-web/main.go:54","msg":"[Info] web server启动失败","error":"http: Server closed"}
+{"level":"INFO","time":"2023-02-12T13:55:20.509+0800","caller":"user-web/main.go:70","msg":"server退出了"}

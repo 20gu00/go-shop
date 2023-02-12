@@ -19,3 +19,10 @@ type UserListRes struct {
 	Gender   string `json:"gender"`
 	Mobile   string `json:"mobile"`
 }
+
+type UserRegisterInput struct {
+	Mobile   string `json:"mobile" form:"mobile" binding:"required,mobile"`           // 自定义手机号码验证规则
+	Password string `json:"password" form:"password" binding:"required,min=3,max=50"` // 逗号之间不能有空格,最少3个最大50个
+	// 短信验证码
+	SmsCode string `json:"sms_code" form:"sms_code" binding:"required,min=6,max=6"`
+}

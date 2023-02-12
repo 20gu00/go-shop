@@ -1,3 +1,4 @@
 这是api层,实际上没有必要设置mysql和redis,不需要使用数据库,直接调用rpc即可
 docker run -d -p 6379:6379 redis:latest redis-server
 redis-cli -h 127.0.0.1
+docker container update--restart=always redis容器id
