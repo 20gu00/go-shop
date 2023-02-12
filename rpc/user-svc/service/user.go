@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 	"github.com/golang/protobuf/ptypes/empty"
-	"go-shop/global/salt-passwd"
-	"go-shop/model"
-	pb2 "go-shop/pb"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"time"
+	"user-rpc/global/salt-passwd"
+	"user-rpc/model"
+	pb2 "user-rpc/pb"
 )
 
 // user grpc service

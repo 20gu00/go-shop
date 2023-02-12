@@ -51,3 +51,5 @@ dns访问测试:dig @192.168.2.100 -p 8600 consul.service.consul SRV
 
 
 go的consul库来实现服务的注册 健康检查 发现
+
+将rpc中的服务注册进consul中,api层通过consul去服务发现rpc

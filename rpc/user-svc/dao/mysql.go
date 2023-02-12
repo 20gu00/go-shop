@@ -1,8 +1,10 @@
 package dao
 
 import (
+	"fmt"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
+	"user-rpc/common/setUp/config"
 )
 
 var (
@@ -10,8 +12,8 @@ var (
 	DB *gorm.DB
 )
 
-func InitMysql() {
-	dsn := "root:Dl123456@tcp(127.0.0.1:13306)/go_shop?charset=utf8&parseTime=True&loc=Local"
+func InitMysql(cfg *config.MysqlConfig) {
+	//dsn := "root:Dl123456@tcp(127.0.0.1:13306)/go_shop?charset=utf8&parseTime=True&loc=Local"
 	//gormLogger := logger.New(
 	//	// io.Writer
 	//	// interface{} any 可以忽略
@@ -25,6 +27,14 @@ func InitMysql() {
 	//		Colorful: true,
 	//	},
 	//)
+
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?parseTime=true&loc=Local",
+		cfg.UserName,
+		cfg.MysqlPassword,
+		cfg.MysqlAddr,
+		cfg.MysqlPort,
+		cfg.DBName,
+	)
 
 	// 建立连接
 	var err error

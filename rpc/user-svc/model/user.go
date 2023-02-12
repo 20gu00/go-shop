@@ -1,9 +1,9 @@
 package model
 
 import (
-	"go-shop/dao"
-	"go-shop/global/paginate-list"
 	"time"
+	"user-rpc/dao"
+	"user-rpc/global/paginate-list"
 
 	"gorm.io/gorm"
 )

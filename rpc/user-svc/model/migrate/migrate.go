@@ -7,10 +7,10 @@ import (
 	"crypto/sha512"
 	"fmt"
 	"github.com/anaskhan96/go-password-encoder"
-	"go-shop/model"
 	"log"
 	"os"
 	"time"
+	"user-rpc/model"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"

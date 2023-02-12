@@ -3,9 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
-	pb2 "go-shop/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	pb2 "user-rpc/pb"
 )
 
 /*

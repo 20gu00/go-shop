@@ -3,22 +3,34 @@ package main
 import (
 	"flag"
 	"fmt"
-	"go-shop/global"
-	"go-shop/pb"
-	"go-shop/service"
 	"google.golang.org/grpc"
 	"net"
+	"user-rpc/common/setUp/config"
+	"user-rpc/global"
+	"user-rpc/pb"
+	"user-rpc/service"
 )
 
 func main() {
 	// 返回的是指针
+	var confFile string
+	flag.StringVar(&confFile, "conf", "", "配置文件")
 	ip := flag.String("ip", "0.0.0.0", "ip")
 	port := flag.String("port", "50051", "port")
 	address := fmt.Sprintf("%s:%s", *ip, *port)
 
 	flag.Parse()
 
-	global.Init()
+	//读取配置文件,加载配置文件需要时间如果用goroutine方式去加载最好主goroutine阻塞一会,不然那拿到的配置值为空
+	if err := config.ConfRead(confFile); err != nil {
+		fmt.Printf("读取配置文件失败, err:%v\n", err)
+		panic(err)
+	}
+
+	ch := make(chan int)
+	go func() {
+		global.Init(ch)
+	}()
 
 	// 创建server
 	server := grpc.NewServer()
