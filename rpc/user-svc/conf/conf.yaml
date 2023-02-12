@@ -1,6 +1,8 @@
 #程序
 app_name: "user-rpc"
 app_port: 50051
+app_host:
+
 mode: "dev"  #dev:日志输出到终端,开发格式的zap日志   prod:日志输出到文件,zap的生产格式日志
 read_timeout: 10
 write_timeout: 10
@@ -43,9 +45,11 @@ auth:
 #阿里云短信服务
 sms:
   # key_id
-  key: AccessKeyIdxxxxx
-  key_secret: AccessKeySecretxxxxx
+  key: "AccessKeyIdxxxxx"
+  key_secret: "AccessKeySecretxxxxx"
 
   exp: 120
 
-
+consul:
+  host: "192.168.23.146"
+  port: 8500

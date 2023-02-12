@@ -9,10 +9,13 @@ import (
 var Conf = new(AppConfig)
 
 type AppConfig struct {
-	Name         string `mapstructure:"app_name"`
-	Mode         string `mapstructure:"mode"`
-	Version      string `mapstructure:"vesion"`
-	Port         int    `mapstructure:"app_port"`
+	Mode    string `mapstructure:"mode"`
+	Version string `mapstructure:"vesion"`
+	// rpc服务的信息,consul服务发现使用
+	//Host string `mapstructure:"app_host"`
+	Port int    `mapstructure:"app_port"`
+	Name string `mapstructure:"app_name"`
+
 	ReadTimeout  int    `mapstructure:"read_timeout"`
 	WriteTimeout int    `mapstructure:"write_timeout"`
 	MaxHeader    int    `mapstructure:"max_header"`
@@ -23,6 +26,7 @@ type AppConfig struct {
 	*MysqlConfig `mapstructure:"mysql"`
 	*RedisConfig `mapstructure:"redis"`
 	//*SmsConfig   `mapstructure:"sms"`
+	ConsuleConfig *ConsulConfig `mapstructure:"consul"`
 }
 
 type LogConfig struct {
@@ -32,6 +36,11 @@ type LogConfig struct {
 	MaxAge    int    `mapstructure:"max_age"`
 	MaxBackup int    `mapstructure:"max_backup"`
 	Compress  bool   `mapstructure:"compress"`
+}
+
+type ConsulConfig struct {
+	Host string `mapstructure:"host"`
+	Port int    `mapstructure:"port"`
 }
 
 //type SmsConfig struct {
