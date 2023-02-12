@@ -19,3 +19,35 @@ docker run -d -p 8500:8500 -p 8300:8300 -p 8301:8301 -p 8302:8302 -p 8600:8600/u
 docker container update --restart=always container_id
 浏览器访问:127.0.0.1:8500   service
 (8500 http 8600 dns)
+dns访问测试:dig @192.168.2.100 -p 8600 consul.service.consul SRV
+完整域名后缀service.consul consul是service列表中默认有的
+通过域名方式访问,从consul中拿到域名对应的ip,也就是consul也实现了dns服务器的功能,或者k8s中的service
+
+
+
+
+
+-----------------------consul的api接口
+支持http,直接使用postman即可
+
+
+1.添加服务
+/agent/service/register(http://127.0.0.1:8500/v1/...) PUT conten-type是json
+发送的数据是raw json
+
+{
+    "Name":"user-rpc",
+    "ID":"user-rpc",
+    "Tags":["web","v1"],
+    "Address":"127.0.0.1",
+    "Port":"50051"
+}
+如果不指明服务进行健康检查,那么service列表看到服务默认显示健康检查通过
+
+一般需要 Name ID(不提供就和Name一致) Tag Address(ip地址) Port Check
+
+2.注销服务
+/agent/service/deregister/user-rpc(ID)   PUT
+
+
+go的consul库来实现服务的注册 健康检查 发现
