@@ -1,0 +1,21 @@
+服务注册和发现:
+
+首先api层调用相应的rpc服务必须要知道ip:port或者域名(k8s的service)(api和api api和rpc rpc和rpc之间都可能访问)
+如果服务数量多了,在采用这种服务独立的配置文件的方式来获取ip:port会很麻烦,尤其是微服务环境中
+比如要新增一个服务,或者通过scale服务的副本数目来实现高并发,那么这是整个架构中各个服务间的通信就要相应的添加配置
+可能会很多服务都要添加这个新服务的ip:port等
+也就是新增或者修改了某个服务导致其他的服务要更新
+
+
+添加个注册中心,api或者rpc或者各个副本都要来注册自己的信息,比如ip:port,那么比如api访问某个rpc服务时就去注册中心找
+(比如要访问a服务,那么就去注册中心拉取a服务相关的注册的配置信息,从而访问a服务
+
+注册中心:注册 被拉取 健康检查(检查服务可用性)   zookeeper consul etcd
+
+包括最外层的服务网关,也可以到注册中心拿到相应的服务,从而转发流量的
+
+consul安装:
+docker run -d -p 8500:8500 -p 8300:8300 -p 8301:8301 -p 8302:8302 -p 8600:8600/udp consul consul agent -dev -client=0.0.0.0
+docker container update --restart=always container_id
+浏览器访问:127.0.0.1:8500   service
+(8500 http 8600 dns)
