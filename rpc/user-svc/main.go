@@ -35,11 +35,8 @@ func main() {
 		panic(err)
 	}
 
-	ch := make(chan int)
-	go func() {
-		global.Init(ch)
-	}()
-
+	global.Init()
+	fmt.Println("11")
 	// 创建server
 	server := grpc.NewServer()
 
@@ -55,6 +52,7 @@ func main() {
 	cfg.Address = fmt.Sprintf("%s:%d", config.Conf.ConsuleConfig.Host, config.Conf.ConsuleConfig.Port) //"127.0.0.1:8500" //"192.168.23.100:8500"
 	client, err := api.NewClient(cfg)
 	if err != nil {
+
 		return
 	}
 	// 要注册的对象
@@ -76,6 +74,7 @@ func main() {
 
 	}
 	if err := client.Agent().ServiceRegister(registor); err != nil {
+		fmt.Println("22", err.Error())
 		return
 	}
 

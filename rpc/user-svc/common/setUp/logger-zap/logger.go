@@ -44,7 +44,7 @@ func InitLogger(cfg *config.LogConfig, mode string) (err error) {
 	zap.ReplaceGlobals(logger) //可有可无,在配置logger是最好使用这里的logger配置,外部使用可以使用zap的logger
 	zap.L().Info("初始化logger完成")
 	//sugarLogger := zap.L().Sugar()
-	return
+	return nil
 }
 
 func getEncoder() zapcore.Encoder {
