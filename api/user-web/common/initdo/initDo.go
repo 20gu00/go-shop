@@ -8,6 +8,7 @@ import (
 	"time"
 	"user-web/common"
 	"user-web/common/validators"
+	"user-web/dao/redis"
 
 	"go.uber.org/zap"
 
@@ -34,15 +35,15 @@ func InitDO(ch chan int) {
 	//	fmt.Printf("初始化mysql失败, err:%v\n", err)
 	//	panic(err)
 	//}
-	// 外部调用的时候使用
+	// 外部调用的时候使用,或者chan阻塞这个goroutine
 	//defer mysql.DBClose()
 
 	//初始化redis连接
-	//if err := redis.InitRedis(config.Conf.RedisConfig); err != nil {
-	//	fmt.Printf("初始化redis失败, err:%v\n", err)
-	//	panic(err)
-	//}
-	//defer redis.RDBClose()
+	if err := redis.InitRedis(config.Conf.RedisConfig); err != nil {
+		fmt.Printf("初始化redis失败, err:%v\n", err)
+		panic(err)
+	}
+	defer redis.RDBClose()
 
 	//雪花算法生成分布式uid
 	//if err := snowflake.InitSnowFlake(config.Conf.StartTime, config.Conf.MachineID); err != nil {

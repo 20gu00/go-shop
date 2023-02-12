@@ -39,3 +39,13 @@ log:
 #jwt
 auth:
   jwt_expire: 10
+
+#阿里云短信服务
+sms:
+  # key_id
+  key: AccessKeyIdxxxxx
+  key_secret: AccessKeySecretxxxxx
+
+  exp: 120
+
+

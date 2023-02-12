@@ -22,6 +22,7 @@ type AppConfig struct {
 	*LogConfig   `mapstructure:"log"`
 	*MysqlConfig `mapstructure:"mysql"`
 	*RedisConfig `mapstructure:"redis"`
+	*SmsConfig   `mapstructure:"sms"`
 }
 
 type LogConfig struct {
@@ -33,6 +34,11 @@ type LogConfig struct {
 	Compress  bool   `mapstructure:"compress"`
 }
 
+type SmsConfig struct {
+	Key    string `mapstructure:"key"`
+	Secret string `mapstructure:"key_secret"`
+	Exp    int    `mapstructure:"exp"`
+}
 type MysqlConfig struct {
 	MysqlAddr     string `mapstructure:"mysql_addr"`
 	MysqlPort     int    `mapstructure:"mysql_port"`
