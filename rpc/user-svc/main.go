@@ -76,7 +76,7 @@ func main() {
 
 	}
 	if err := client.Agent().ServiceRegister(registor); err != nil {
-		return err
+		return
 	}
 
 	// 建立连接
