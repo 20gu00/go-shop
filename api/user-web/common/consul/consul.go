@@ -3,6 +3,7 @@ package consulDo
 import (
 	"fmt"
 	"github.com/hashicorp/consul/api"
+	_ "github.com/mbobakov/grpc-consul-resolver"
 )
 
 func ConsulRegister(name string, id string, addr string, port int, tag []string) error {
@@ -105,4 +106,9 @@ func DeRegister(id string) error {
 		return err
 	}
 	return nil
+}
+
+// api层(gin)从consul拉取服务信息
+func PullFromConsul() {
+
 }

@@ -90,6 +90,10 @@ api服务调用也就是请求访问rpc服务,rpc服务可能有很多个实例,
 
 开发人员主要处理的是grpc调用的负载均衡,外部的nginx转发到api层等主要是运维做
 
+实际上grpc内置了grpcdb proxy来做负载均衡策略,可以代码内定义,也可以引入外部lb的负载均衡策略
+首先grpc的client得先去注册中心consul拉取服务信息
+mbobakov/grpc-consul-resolver主要用于将注册中心服务拉取到本地
+
 
 
 
