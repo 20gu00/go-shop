@@ -110,5 +110,5 @@ func DeRegister(id string) error {
 
 // api层(gin)从consul拉取服务信息
 func PullFromConsul() {
-
+	
 }
