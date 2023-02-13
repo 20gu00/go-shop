@@ -1,9 +1,0 @@
-{"level":"INFO","time":"2023-02-12T23:05:19.012+0800","caller":"logger-zap/logger.go:45","msg":"初始化logger完成"}
-{"level":"INFO","time":"2023-02-13T01:22:34.403+0800","caller":"logger-zap/logger.go:45","msg":"初始化logger完成"}
-{"level":"INFO","time":"2023-02-13T01:25:19.041+0800","caller":"logger-zap/logger.go:45","msg":"初始化logger完成"}
-{"level":"INFO","time":"2023-02-13T01:25:37.716+0800","caller":"logger-zap/logger.go:45","msg":"初始化logger完成"}
-{"level":"INFO","time":"2023-02-13T01:28:55.481+0800","caller":"logger-zap/logger.go:45","msg":"初始化logger完成"}
-{"level":"INFO","time":"2023-02-13T01:35:07.636+0800","caller":"logger-zap/logger.go:45","msg":"初始化logger完成"}
-{"level":"INFO","time":"2023-02-13T01:35:51.630+0800","caller":"logger-zap/logger.go:45","msg":"初始化logger完成"}
-{"level":"INFO","time":"2023-02-13T01:36:23.653+0800","caller":"logger-zap/logger.go:45","msg":"初始化logger完成"}
-{"level":"INFO","time":"2023-02-13T01:39:29.667+0800","caller":"logger-zap/logger.go:45","msg":"初始化logger完成"}

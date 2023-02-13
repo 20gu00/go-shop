@@ -13,6 +13,7 @@ import (
 	"time"
 	"user-web/common/initdo"
 	"user-web/common/setUp/config"
+	"user-web/common/tool"
 	"user-web/router"
 )
 
@@ -34,6 +35,13 @@ func main() {
 		initdo.InitDO(ch)
 	}()
 	r := router.InitRouter()
+
+	// 考虑一个问题,如果是本地开发环境端口固定也就是配置文件手动写定没问题,那如果服务很多,或者一台主机上很多服务,手动管理端口就不合适
+	// 线上环境应该获取可用端口,至于服务暴露通过网关等,这些可以在负载均衡中做
+	port, err := tool.GetFreePort()
+	if err == nil {
+		config.Conf.Port = port
+	}
 
 	server := http.Server{
 		Addr:           fmt.Sprintf(":%d", config.Conf.Port),

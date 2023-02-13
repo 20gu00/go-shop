@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"google.golang.org/grpc"
 	"strconv"
+	"user-rpc/common/tool"
 
 	"github.com/hashicorp/consul/api"
 	"google.golang.org/grpc/health"
@@ -24,10 +25,18 @@ func main() {
 	// 建议不要写0.0.0.0,写本机ip192.168.23.146,不然consul发现有问题
 	// 或者后续的grpc检查的ip从配置中心获取,也就是本机ip
 	ip := flag.String("ip", "0.0.0.0", "ip")
-	port := flag.String("port", "50051", "port")
-	address := fmt.Sprintf("%s:%s", *ip, *port)
+	port := flag.String("port", "0", "port")
 
 	flag.Parse()
+
+	// 动态获取的这些内容都写入到注册中心,访问通过注册中心访问即可
+	if *port == "0" {
+		// 没有从命令行获取端口
+		p, _ := tool.GetFreePort()
+		*port = strconv.Itoa(p)
+	}
+
+	address := fmt.Sprintf("%s:%s", *ip, *port)
 
 	//读取配置文件,加载配置文件需要时间如果用goroutine方式去加载最好主goroutine阻塞一会,不然那拿到的配置值为空
 	if err := config.ConfRead(confFile); err != nil {
@@ -67,10 +76,10 @@ func main() {
 	// 健康检查的对象
 	//IpPort := fmt.Sprintf("%s:%d", addr, port)
 	registor.Check = &api.AgentServiceCheck{
-		GRPC:                           "192.168.23.146:50051", //"http://" + IpPort + "/health", // ping
-		Timeout:                        "10s",                  // 健康检查超时的时间
-		Interval:                       "5s",                   // 检查间隔
-		DeregisterCriticalServiceAfter: "10s",                  // 健康检查失败后移除服务
+		GRPC:                           fmt.Sprintf("192.168.23.146:%d", *port), //"http://" + IpPort + "/health", // ping
+		Timeout:                        "10s",                                   // 健康检查超时的时间
+		Interval:                       "5s",                                    // 检查间隔
+		DeregisterCriticalServiceAfter: "10s",                                   // 健康检查失败后移除服务
 
 	}
 	if err := client.Agent().ServiceRegister(registor); err != nil {
