@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"github.com/hashicorp/consul/api"
 	_ "github.com/mbobakov/grpc-consul-resolver"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+	"log"
 )
 
 func ConsulRegister(name string, id string, addr string, port int, tag []string) error {
@@ -110,5 +113,18 @@ func DeRegister(id string) error {
 
 // api层(gin)从consul拉取服务信息
 func PullFromConsul() {
-	
+	c, err := grpc.Dial(
+		// consul中的service_name
+		// wait等待解析多长时间
+		// limit有多个服务只要多少个
+		// tag=manual过滤作用
+		"consul://192.168.23.146/user-rpc?wait=15s",
+		// grpc.WithInsecure(),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithDefaultServiceConfig(`{"loadBalancingPolicy": "round_robin"}`),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer c.Close()
 }
