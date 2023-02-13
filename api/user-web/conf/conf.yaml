@@ -49,3 +49,13 @@ sms:
   exp: 120
 
 
+consul:
+  host: "192.168.23.146"
+  port: 8500
+
+#rpc服务的信息
+user-rpc:
+  host: "127.0.0.1"
+  port: 50051
+  #从consul中照这个service name
+  name: "user-rpc"

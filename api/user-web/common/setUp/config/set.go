@@ -19,10 +19,18 @@ type AppConfig struct {
 	StartTime    string `mapstructure:"start_time"`
 	MachineID    int64  `mapstructure:"machine_id"`
 
-	*LogConfig   `mapstructure:"log"`
-	*MysqlConfig `mapstructure:"mysql"`
-	*RedisConfig `mapstructure:"redis"`
-	*SmsConfig   `mapstructure:"sms"`
+	*LogConfig    `mapstructure:"log"`
+	*MysqlConfig  `mapstructure:"mysql"`
+	*RedisConfig  `mapstructure:"redis"`
+	*SmsConfig    `mapstructure:"sms"`
+	ConsulConfig  *ConsulConfig `mapstructure:"consul"`
+	UserRpcConfig *UserRpc      `mapstructure:"user-rpc"`
+}
+
+type UserRpc struct {
+	Host string `mapstructure:"host"`
+	Port int    `mapstructure:"port"`
+	Name string `mapstructure:"name"`
 }
 
 type LogConfig struct {
@@ -32,6 +40,11 @@ type LogConfig struct {
 	MaxAge    int    `mapstructure:"max_age"`
 	MaxBackup int    `mapstructure:"max_backup"`
 	Compress  bool   `mapstructure:"compress"`
+}
+
+type ConsulConfig struct {
+	Host string `mapstructure:"host"`
+	Port int    `mapstructure:"port"`
 }
 
 type SmsConfig struct {

@@ -2,8 +2,10 @@ package api
 
 import (
 	"context"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/hashicorp/consul/api"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -14,6 +16,7 @@ import (
 	"time"
 	"user-web/common"
 	"user-web/common/jwt"
+	"user-web/common/setUp/config"
 	"user-web/dao/redis"
 	user2 "user-web/model/user"
 	"user-web/pb"
@@ -25,7 +28,7 @@ func init() {
 	// 方便开发,暂时直接写,viper已经做好了,也可以通过viper来做这些配置信息
 	conn, err := grpc.Dial("127.0.0.1:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		zap.L().Error("[ GetUserList ]连接grpc server失败", zap.Error(err))
+		zap.L().Error("连接grpc server失败", zap.Error(err))
 	}
 
 	userClient = pb.NewUserClient(conn)
@@ -133,24 +136,66 @@ func UserPasswdLogin(ctx *gin.Context) {
 
 // 获取用户列表
 func GetUserList(ctx *gin.Context) {
+	cfg := api.DefaultConfig()
+	cfg.Address = fmt.Sprintf("%s:%d", config.Conf.ConsulConfig.Host, config.Conf.ConsulConfig.Port)
+
+	client, err := api.NewClient(cfg)
+	if err != nil {
+		zap.L().Error("[ GetUserList ]创建consul的client失败")
+		return
+	}
+
+	userRpcHost := ""
+	userRpcPort := 0
+	//data,err:=client.Agent().ServicesWithFilter(`Service == "user-rpc"`)
+	// 这个格式很重要  或者转义比如\"
+	data, err := client.Agent().ServicesWithFilter(fmt.Sprintf(`Service =="%s"`, config.Conf.UserRpcConfig.Name))
+	if err != nil {
+		zap.L().Error("[ GetUserList ]从consul总过滤服务失败")
+		return
+	}
+	for _, v := range data {
+		userRpcHost = v.Address
+		userRpcPort = v.Port
+		// 获取这个service任意一个负载即可
+		break
+	}
+
+	if userRpcHost == "" {
+		zap.L().Error("[ GetUserList ]获取rpc服务负载实例失败")
+		return
+	}
+
+	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", userRpcHost, userRpcPort), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		zap.L().Error("连接grpc server失败", zap.Error(err))
+	}
+
+	userClient2 := pb.NewUserClient(conn)
+
+	// 解析token获取相应的用户信息
 	claim, _ := ctx.Get("claim")
 	user, ok := claim.(jwt.MyClaims)
 	if !ok {
 		zap.L().Error("context的claim断言失败")
 	}
 	zap.L().Info("访问的用户: ", zap.Int("userId", int(user.ID)))
+
 	// 获取参数 ShouldBindJSON  (json传参)
 	// 设置query参数
 	pNum, _ := strconv.Atoi(ctx.DefaultQuery("pnum", "0"))
 	pSize, _ := strconv.Atoi(ctx.DefaultQuery("psize", "10"))
 
-	res, err := userClient.GetUserList(context.Background(), &pb.PageInfo{
+	res, err := userClient2.GetUserList(context.Background(), &pb.PageInfo{
 		PNum:  uint32(pNum),
 		PSize: uint32(pSize),
 	})
 	if err != nil {
 		// 也就是这个服务端的服务有错,客户端不应该异常的
 		zap.L().Error("[ GetUserList ]查询用户失败")
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"msg": "查询用户失败",
+		})
 		GrpcErrorToHttp(err, ctx)
 	}
 
