@@ -77,8 +77,4 @@ func main() {
 
 	zap.L().Info("server退出了")
 
-	// 定时
-	//timer := time.NewTimer(10 * time.Second)
-	//<-timer.C
-	//os.Exit(1)
 }
