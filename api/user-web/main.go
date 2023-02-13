@@ -69,11 +69,16 @@ func main() {
 	<-stop
 	ch <- c
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	if err := server.Shutdown(ctx); err != nil {
 		zap.L().Fatal("server不正常退出,shutdown", zap.Error(err))
 	}
 
 	zap.L().Info("server退出了")
+
+	// 定时
+	//timer := time.NewTimer(10 * time.Second)
+	//<-timer.C
+	//os.Exit(1)
 }

@@ -1,0 +1,14 @@
+{"level":"INFO","time":"2023-02-14T04:44:12.491+0800","caller":"logger-zap/logger.go:53","msg":"初始化logger完成"}
+{"level":"INFO","time":"2023-02-14T04:48:16.698+0800","caller":"logger-zap/logger.go:53","msg":"初始化logger完成"}
+{"level":"INFO","time":"2023-02-14T04:48:16.768+0800","caller":"user-web/main.go:55","msg":"[Info]","程序名称":"user-web","程序版本":"v1","server port":8080}
+{"level":"ERROR","time":"2023-02-14T04:48:16.785+0800","caller":"initdo/initDo.go:105","msg":"[ GetUserList ]获取rpc服务负载实例失败"}
+{"level":"INFO","time":"2023-02-14T04:58:03.380+0800","caller":"logger-zap/logger.go:53","msg":"初始化logger完成"}
+{"level":"INFO","time":"2023-02-14T04:58:03.387+0800","caller":"user-web/main.go:55","msg":"[Info]","程序名称":"user-web","程序版本":"v1","server port":8080}
+{"level":"ERROR","time":"2023-02-14T04:58:03.411+0800","caller":"initdo/initDo.go:105","msg":"[ GetUserList ]获取rpc服务负载实例失败"}
+{"level":"INFO","time":"2023-02-14T05:01:00.850+0800","caller":"logger-zap/logger.go:53","msg":"初始化logger完成"}
+{"level":"INFO","time":"2023-02-14T05:01:00.864+0800","caller":"user-web/main.go:55","msg":"[Info]","程序名称":"user-web","程序版本":"v1","server port":8080}
+{"level":"ERROR","time":"2023-02-14T05:01:00.867+0800","caller":"initdo/initDo.go:105","msg":"[ GetUserList ]获取rpc服务负载实例失败"}
+{"level":"INFO","time":"2023-02-14T05:07:55.339+0800","caller":"logger-zap/logger.go:53","msg":"初始化logger完成"}
+{"level":"INFO","time":"2023-02-14T05:07:55.345+0800","caller":"user-web/main.go:55","msg":"[Info]","程序名称":"user-web","程序版本":"v1","server port":8080}
+{"level":"INFO","time":"2023-02-14T05:07:57.061+0800","caller":"user-web/main.go:62","msg":"[Info] web server启动失败","error":"http: Server closed"}
+{"level":"INFO","time":"2023-02-14T05:07:57.062+0800","caller":"user-web/main.go:78","msg":"server退出了"}

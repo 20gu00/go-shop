@@ -1,0 +1,5 @@
+docker run -p 13306:3306 --name my-mysql -v $PWD/conf:/etc/mysql -v $PWD/data:/var/lib/mysql -e MYSQL_ROOT_PASSWORD=Dl123456 -d mysql:5.7
+create database go_shop default character set utf8mb4 collate utf8mb4_unicode_ci;
+docker exec -it xxx /bin/bash
+mysql -u root -p
+Dl123456   docker container update--restart=always redis容器id

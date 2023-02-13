@@ -112,5 +112,8 @@ func main() {
 	quit := make(chan os.Signal)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
+	//timer := time.NewTimer(10 * time.Second)
 	client.Agent().ServiceDeregister(id)
+	//<-timer.C
+	//os.Exit(1)
 }

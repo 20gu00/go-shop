@@ -1,0 +1,6 @@
+{"level":"INFO","time":"2023-02-14T04:44:18.165+0800","caller":"logger-zap/logger.go:45","msg":"初始化logger完成"}
+{"level":"INFO","time":"2023-02-14T04:48:17.769+0800","caller":"logger-zap/logger.go:45","msg":"初始化logger完成"}
+{"level":"INFO","time":"2023-02-14T04:54:08.054+0800","caller":"logger-zap/logger.go:45","msg":"初始化logger完成"}
+{"level":"INFO","time":"2023-02-14T04:57:22.606+0800","caller":"logger-zap/logger.go:45","msg":"初始化logger完成"}
+{"level":"INFO","time":"2023-02-14T05:07:21.279+0800","caller":"logger-zap/logger.go:45","msg":"初始化logger完成"}
+{"level":"INFO","time":"2023-02-14T05:07:42.840+0800","caller":"logger-zap/logger.go:45","msg":"初始化logger完成"}

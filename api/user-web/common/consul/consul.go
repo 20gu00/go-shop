@@ -120,7 +120,7 @@ func PullFromConsul() {
 		// tag=manual过滤作用
 		// https://github.com/mbobakov/grpc-consul-resolver
 
-		"consul://192.168.23.146/user-rpc?wait=15s",
+		"consul://192.168.23.146:8500/user-rpc?wait=15s",
 		// grpc.WithInsecure(),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 
