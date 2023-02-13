@@ -4,10 +4,14 @@ import (
 	"flag"
 	"fmt"
 	"google.golang.org/grpc"
+	"os"
+	"os/signal"
 	"strconv"
+	"syscall"
 	"user-rpc/common/tool"
 
 	"github.com/hashicorp/consul/api"
+	"github.com/satori/go.uuid"
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"net"
@@ -66,7 +70,9 @@ func main() {
 	}
 	// 要注册的对象
 	registor := new(api.AgentServiceRegistration)
-	registor.ID = config.Conf.Name
+	// id不同,一个服务多个实例
+	id := fmt.Sprintf("%s", uuid.NewV4())
+	registor.ID = id //config.Conf.Name
 	registor.Name = config.Conf.Name
 	registor.Tags = []string{"user-rpc"}
 	// 注册的服务地址,注意要和下面的GRPC保持一致
@@ -96,8 +102,15 @@ func main() {
 
 	// grpc server启动
 	fmt.Println("服务监听的地址是", address)
-	err = server.Serve(listen)
-	if err != nil {
-		panic("server启动失败")
-	}
+	go func() {
+		err = server.Serve(listen)
+		if err != nil {
+			panic("server启动失败")
+		}
+	}()
+	// 程序优雅退出  对consul注销相关的service的实例
+	quit := make(chan os.Signal)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+	client.Agent().ServiceDeregister(id)
 }

@@ -3,7 +3,7 @@ package consulDo
 import (
 	"fmt"
 	"github.com/hashicorp/consul/api"
-	_ "github.com/mbobakov/grpc-consul-resolver"
+	_ "github.com/mbobakov/grpc-consul-resolver" //匿名引用 init
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"log"
@@ -118,13 +118,21 @@ func PullFromConsul() {
 		// wait等待解析多长时间
 		// limit有多个服务只要多少个
 		// tag=manual过滤作用
+		// https://github.com/mbobakov/grpc-consul-resolver
+
 		"consul://192.168.23.146/user-rpc?wait=15s",
 		// grpc.WithInsecure(),
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
+
+		// 负载均衡算法
 		grpc.WithDefaultServiceConfig(`{"loadBalancingPolicy": "round_robin"}`),
 	)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer c.Close()
+
+	// 创建一个grpc client,操作grpc server,这事是直接操作consul返回的信息
+	//userRpcFromClient:=pb.NewUserClient(c)
+	//可以使用这个client调用方法了
 }
