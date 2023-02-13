@@ -5,10 +5,15 @@ import (
 	"github.com/gin-gonic/gin/binding"
 	ut "github.com/go-playground/universal-translator"
 	"github.com/go-playground/validator/v10"
+	"github.com/hashicorp/consul/api"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"time"
 	"user-web/common"
+	"user-web/common/global"
 	"user-web/common/validators"
 	"user-web/dao/redis"
+	"user-web/pb"
 
 	"go.uber.org/zap"
 
@@ -69,6 +74,49 @@ func InitDO(ch chan int) {
 			return t
 		})
 	}
+
+	// 初始化全局的user rpc client
+	cfg := api.DefaultConfig()
+	cfg.Address = fmt.Sprintf("%s:%d", config.Conf.ConsulConfig.Host, config.Conf.ConsulConfig.Port)
+
+	client, err := api.NewClient(cfg)
+	if err != nil {
+		zap.L().Error("[ GetUserList ]创建consul的client失败")
+		return
+	}
+
+	userRpcHost := ""
+	userRpcPort := 0
+	//data,err:=client.Agent().ServicesWithFilter(`Service == "user-rpc"`)
+	// 这个格式很重要  或者转义比如\"
+	data, err := client.Agent().ServicesWithFilter(fmt.Sprintf(`Service =="%s"`, config.Conf.UserRpcConfig.Name))
+	if err != nil {
+		zap.L().Error("[ GetUserList ]从consul总过滤服务失败")
+		return
+	}
+	for _, v := range data {
+		userRpcHost = v.Address
+		userRpcPort = v.Port
+		// 获取这个service任意一个负载即可
+		break
+	}
+
+	if userRpcHost == "" {
+		zap.L().Error("[ GetUserList ]获取rpc服务负载实例失败")
+		return
+	}
+
+	conn, err := grpc.Dial(fmt.Sprintf("%s:%d", userRpcHost, userRpcPort), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		zap.L().Error("连接grpc server失败", zap.Error(err))
+	}
+	global.GlobalUserClient = pb.NewUserClient(conn)
+
+	// 如果user rpc服务下线了,改ip或者port,那么这个客户端也要需改,这个可以在负载均衡中做
+	// 好处就是建立好一个客户端,可以直接使用,后续不用在去建立tcp三次握手连接(http2也是基于tcp)
+	// 问题,一个连接多个goroutine来使用会有性能问题,于是可以考虑做连接池
+	// grpc-connection-pool或者grpc-go-pool
+	// 可以自己根据这两个项目做个连接池,或者直接使用consul做负载均衡
 
 	<-ch
 	return
