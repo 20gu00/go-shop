@@ -11,6 +11,7 @@ import (
 	"time"
 	"user-web/common"
 	"user-web/common/global"
+	"user-web/common/nacos"
 	"user-web/common/validators"
 	"user-web/dao/redis"
 	"user-web/pb"
@@ -117,6 +118,9 @@ func InitDO(ch chan int) {
 	// 问题,一个连接多个goroutine来使用会有性能问题,于是可以考虑做连接池
 	// grpc-connection-pool或者grpc-go-pool
 	// 可以自己根据这两个项目做个连接池,或者直接使用consul做负载均衡
+
+	// 从nacos读取配置
+	_ = nacos.GetConfigFromNacos()
 
 	<-ch
 	return

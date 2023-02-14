@@ -9,7 +9,7 @@ import (
 var Conf = new(AppConfig)
 
 type AppConfig struct {
-	Name         string `mapstructure:"app_name"`
+	Name         string `mapstructure:"app_name" json:"name"`
 	Mode         string `mapstructure:"mode"`
 	Version      string `mapstructure:"vesion"`
 	Port         int    `mapstructure:"app_port"`
@@ -23,10 +23,22 @@ type AppConfig struct {
 	*MysqlConfig  `mapstructure:"mysql"`
 	*RedisConfig  `mapstructure:"redis"`
 	*SmsConfig    `mapstructure:"sms"`
+	NacosConfig   *NacosConfig  `mapstructure:"nacos"`
 	ConsulConfig  *ConsulConfig `mapstructure:"consul"`
 	UserRpcConfig *UserRpc      `mapstructure:"user-rpc"`
 }
 
+//viper读取nacos配置信息,使用nacos来配置服务的信息
+//不用设置json这个,因为是本地读取
+type NacosConfig struct {
+	Host      string `mapstructure:"host"`
+	Port      int    `mapstructure:"port"`
+	Namespace string `mapstructure:"namespace"`
+	DataId    string `mapstructure:"dataid"`
+	User      string `mapstructure:"user"`
+	Password  string `mapstructure:"password"`
+	Group     string `mapstructure:"group"`
+}
 type UserRpc struct {
 	Host string `mapstructure:"host"`
 	Port int    `mapstructure:"port"`
@@ -93,6 +105,8 @@ func ConfRead(confFile string) (err error) {
 		fmt.Println("将配置信息添加进结构体失败", err)
 	}
 
+	// 不需要额外加goroutine
+	// 主goroutine不退出就不影响goroutine,注意分清楚不是函数退出
 	viper.WatchConfig()
 	viper.OnConfigChange(func(e fsnotify.Event) {
 		fmt.Println("配置文件已经修改")
@@ -100,5 +114,8 @@ func ConfRead(confFile string) (err error) {
 			fmt.Println("将配置信息添加进结构体失败", err)
 		}
 	})
+
+	// time.Sleep(5000 *time.Second)
+
 	return nil
 }

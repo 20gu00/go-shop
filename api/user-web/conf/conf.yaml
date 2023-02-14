@@ -8,6 +8,20 @@ max_header: 20
 version: "v1"
 start_time: "2023-02-10"
 machine_id: 1
+
+#设置nacos,从nacos读取配置,那么很多配置这里就不用维护了
+nacos:
+  host: "192.168.23.146"
+  port: 8848
+  #namespace_id
+  namespace: "xxxxxxxxxxxxxx"
+  user: "nacos"
+  passwd: "nacos"
+  #这个服务(api)的配置集
+  dataid: "user-api"
+  group: "dev
+"
+
 #mysql
 mysql:
   mysql_addr: "127.0.0.1"
