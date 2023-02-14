@@ -59,9 +59,12 @@ func GetConfigFromNacos() error {
 		return err
 	}
 	//fmt.Println(content)
+
+	// 可以将appConfig做成全局变量来使用,或者直接解码到config.Conf
 	appConfig := new(config.AppConfig)
 	// 注意要将这个json字符串转换成这个appConfig,那么这个struct要设置json的tag,不设置可能转换后为空
-	json.Unmarshal([]byte(content), &appConfig)
+	// 指针
+	json.Unmarshal([]byte(content), appConfig)
 	fmt.Println(appConfig)
 
 	//监听配置文件变化
