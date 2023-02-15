@@ -109,9 +109,7 @@ type Banner struct {
 
 // gorm自定义数据类型
 // 存储[],实际上存储的是字符串
-type GormList []string {
-
-}
+type GormList []string
 
 //自定义的数据类型必须实现 Scanner 和 Valuer 接口，以便让 GORM 知道如何将该类型接收、保存到数据库
 // 实现 driver.Valuer 接口，Value 返回 json value
@@ -125,8 +123,3 @@ func (g *GormList) Scan(value interface{}) error {
 	// 从数据库中拿出来
 	return json.Unmarshal(value.([]byte), g)
 }
-
-
-
-
-

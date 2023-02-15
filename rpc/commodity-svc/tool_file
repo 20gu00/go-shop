@@ -7,5 +7,7 @@
 4.品牌 brand: 名称 logo
 5.品牌分类  品牌和商品分类之间的多多对关系,比如一个商品分类手机,品牌有华为小米,每个品牌有有多个商品分类,所以是品牌表和分类表的多对多关系的中间表 catogoryBrands: 品牌 分类
 
+// 商品数据库
+create database go_shop_commodity default character set utf8mb4 collate utf8mb4_unicode_ci;
 
 接口:
