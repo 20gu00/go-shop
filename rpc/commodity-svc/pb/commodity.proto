@@ -1,0 +1,108 @@
+syntax="proto3";
+
+import "google/protobuf/empty.proto";
+
+option go_package="./;pb";
+
+service Commodity{
+  // 商品 commodity服务
+  // 商品列表
+  rpc CommodityList(CommodityFilterReq)returns(CommodityListRes);
+
+  // 商品增删改查
+  rpc CreateCommodity(CreateCommodityReq)returns(CommodityInfoRes);
+  rpc DeleteCommodity(DeleteCommodityReq)returns(google.protobuf.Empty);
+  rpc UpdateCommodity(CreateCommodityReq)returns(google.protobuf.Empty);
+  rpc GetCommodity(CommodityInfoReq)returns(CommodityInfoRes);
+
+  // 批量获取商品信息(比如一个订单中有多个商品)
+  rpc GetBatchCommodity(CommodityBatchIdReq)returns(CommodityListRes);
+
+
+  // 商品分类 category服务
+  // 商品分类列表
+  rpc AllCategoryList(google.protobuf.Empty)returns(CategoryListRes);
+  // 获取商品的子分类
+  rpc SubCategoryList(CategoryListReq)returns(SubCategoryListRes);
+  // 商品分类的增删改
+  rpc CreateCategory(CreateCommodityReq)returns(CategoryInfoRes);
+  rpc DeleteCategory(DeleteCategoryReq)returns(google.protobuf.Empty);
+  rpc UpdateCategory(CategoryInfoReq)returns(google.protobuf.Empty);
+
+}
+
+message BrandReq{
+  int32 id=1;
+  string name=2;
+  string logo=3;
+}
+
+
+
+message CategoryEasyInfoRes{
+  int32 id=1;
+  string name=2;
+}
+
+message CategoryFileterReq{
+  int32 id=1;
+  bool isTab=2;
+}
+
+message CommodityFilterReq {
+  int32 topCategory=1;
+  // 价格区间
+  int32 minPri =2;
+  int32 maxPri=3;
+  bool hot=4;
+  bool new=5;
+  // 是否是最上面的tab中的商品
+  bool tab=6;
+  // 点击以及目录,会列出目录下的其他级别目录
+  // 上册目录
+  int32 topCategory=7;
+  int32 pages=8;
+  int32 pagePerNum=9;
+  string brand=10;
+  // 搜索关键字
+  string key=11;
+}
+
+message DeleteCommodityInfo{
+  int32 id=1;
+}
+
+message CommodityInfoReq{
+  int32 id=1;
+}
+
+message CommodityInfoRes {
+  int32 id=1;
+  string name=2;
+  int32 categoryid=3;
+  string commoditySn=4;
+  int32 readNum=5;
+  int32 favNum=6;
+  int32 saleNum=7;
+  float commonPri=8;
+  // 本地价格
+  float shopPri=9;
+  string easyDesc=10;
+  string desc=11;
+  bool freeShip=12;
+  repeated string images=13;
+  repeated string descImages=14;
+  string frontImage=15;
+  bool new=16;
+  bool hot=17;
+  bool sale=18;
+  int64 addTime=19;
+  // 商品表有两个外键,可以查询到商品分类表和品牌表的信息
+  CategoryEasyInfoRes category=20;
+  BrandInfoRes brand=21;
+}
+
+message CommodityListRes{
+  repeated CommodityInfoRes data=1;
+  int32 total=2;
+}
