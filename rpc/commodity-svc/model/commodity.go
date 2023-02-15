@@ -80,6 +80,7 @@ type Brand struct {
 
 }
 
+// 品牌分类表,中间表
 // gorm可以自动根据tag生成多对多的中间表
 // 自行手动建立
 type CategoryBrand struct {

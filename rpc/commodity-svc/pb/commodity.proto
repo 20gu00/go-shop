@@ -11,12 +11,12 @@ service Commodity{
 
   // 商品增删改查
   rpc CreateCommodity(CreateCommodityReq)returns(CommodityInfoRes);
-  rpc DeleteCommodity(DeleteCommodityReq)returns(google.protobuf.Empty);
+  rpc DeleteCommodity(DeleteCommodityInfo)returns(google.protobuf.Empty);
   rpc UpdateCommodity(CreateCommodityReq)returns(google.protobuf.Empty);
   rpc GetCommodity(CommodityInfoReq)returns(CommodityInfoRes);
 
-  // 批量获取商品信息(比如一个订单中有多个商品)
-  rpc GetBatchCommodity(CommodityBatchIdReq)returns(CommodityListRes);
+  // 批量获取商品信息(比如一个订单中有多个商品,多个商品的id)
+  rpc GetBatchCommodity(BatchCommodityIdInfo)returns(CommodityListRes);
 
 
   // 商品分类 category服务
@@ -29,15 +29,79 @@ service Commodity{
   rpc DeleteCategory(DeleteCategoryReq)returns(google.protobuf.Empty);
   rpc UpdateCategory(CategoryInfoReq)returns(google.protobuf.Empty);
 
+  //轮播图
+  rpc BannerList(google.protobuf.Empty) returns(BannerListRes);
+  rpc CreateBanner(BannerReq) returns(BannerRes);
+  rpc DeleteBanner(BannerReq) returns(google.protobuf.Empty);
+  rpc UpdateBanner(BannerReq) returns(google.protobuf.Empty);
+
+  //品牌
+  rpc BrandList(BrandFilterReq) returns(BrandListRes);
+  rpc CreateBrand(BrandReq) returns(BrandInfoRes);
+  rpc DeleteBrand(BrandReq) returns(google.protobuf.Empty);
+  rpc UpdateBrand(BrandReq) returns(google.protobuf.Empty);
+
+
+  //品牌和分类
+  rpc CategoryBrandList(CategoryBrandFilterReq) returns(CategoryBrandListRes);
+  //通过category获取brands
+  rpc GetCategoryBrandList(CategoryInfoReq) returns(BrandListRes);
+  rpc CreateCategoryBrand(CategoryBrandReq) returns(CategoryBrandRes);
+  rpc DeleteCategoryBrand(CategoryBrandReq) returns(google.protobuf.Empty);
+  rpc UpdateCategoryBrand(CategoryBrandReq) returns(google.protobuf.Empty);
 }
 
+//--------------------------------brand
 message BrandReq{
   int32 id=1;
   string name=2;
   string logo=3;
 }
 
+message BrandFilterReq {
+  int32 pages = 1;
+  int32 pagePerNums = 2;
+}
 
+message BrandInfoRes {
+  int32 id = 1;
+  string name = 2;
+  string logo = 3;
+}
+
+message BrandListRes {
+  int32 total = 1;
+  repeated BrandInfoRes data = 2;
+}
+
+
+//---------------------------------------banner
+
+message BannerListRes {
+  int32 total = 1;
+  repeated BannerRes data = 2;
+}
+
+message BannerReq {
+  int32 id = 1;
+  int32 index = 2;
+  string image = 3;
+  string url = 4;
+}
+
+message BannerRes {
+  int32 id = 1;
+  int32 index = 2;
+  string image = 3;
+  string url = 4;
+}
+
+//----------------------------------category
+message BatchCategoryInfoReq {
+  repeated int32 id = 1;
+  int32 goodsNums = 2;
+  int32 brandNums = 3;
+}
 
 message CategoryEasyInfoRes{
   int32 id=1;
@@ -49,8 +113,82 @@ message CategoryFileterReq{
   bool isTab=2;
 }
 
+message CategoryListReq {
+  int32 id = 1;
+  int32 level = 2;
+}
+
+message CategoryInfoReq {
+  int32 id = 1;
+  string name = 2;
+  int32 parentCategory = 3;
+  int32 level = 4;
+  bool isTab = 5;
+}
+
+message DeleteCategoryReq {
+  int32 id = 1;
+}
+
+message QueryCategoryReq {
+  int32 id = 1;
+  string name = 2;
+}
+
+message CategoryInfoRes {
+  int32 id = 1;
+  string name = 2;
+  int32 parentCategory = 3;
+  int32 level = 4;
+  bool isTab = 5;
+}
+
+message CategoryListRes {
+  int32 total = 1;
+  repeated CategoryInfoRes data = 2;
+  string jsonData = 3;
+}
+
+message SubCategoryListRes {
+  int32 total = 1;
+  CategoryInfoRes info = 2;
+  repeated CategoryInfoRes subCategorys = 3;
+}
+
+message CategoryBrandFilterReq  {
+  int32 pages = 1;
+  int32 pagePerNums = 2;
+}
+
+message FilterReq  {
+  int32 pages = 1;
+  int32 pagePerNums = 2;
+}
+
+//-------------------categorybrand
+message CategoryBrandReq{
+  int32 id = 1;
+  int32 categoryId = 2;
+  int32 brandId = 3;
+}
+
+message CategoryBrandRes{
+  int32 id = 1;
+  BrandInfoRes brand = 2;
+  CategoryInfoRes category = 3;
+}
+
+message CategoryBrandListRes {
+  int32 total = 1;
+  repeated CategoryBrandRes data = 2;
+}
+
+//-----------------------------commodity
+message BatchCommodityIdInfo {
+  repeated int32 id = 1;
+}
+
 message CommodityFilterReq {
-  int32 topCategory=1;
   // 价格区间
   int32 minPri =2;
   int32 maxPri=3;
@@ -105,4 +243,42 @@ message CommodityInfoRes {
 message CommodityListRes{
   repeated CommodityInfoRes data=1;
   int32 total=2;
+}
+
+message CreateCommodityReq {
+  int32 id = 1;
+  string name = 2;
+  string goodsSn = 3;
+  int32 stocks = 7; //库存，
+  float marketPrice = 8;
+  float shopPrice = 9;
+  string goodsBrief = 10;
+  string goodsDesc = 11;
+  bool shipFree = 12;
+  repeated string images = 13;
+  repeated string descImages = 14;
+  string goodsFrontImage = 15;
+  bool isNew = 16;
+  bool isHot = 17;
+  bool onSale = 18;
+  int32 categoryId = 19;
+  int32 brandId = 20;
+}
+
+message CommodityReduceReq {
+  int32 GoodsId = 1;
+  int32 nums = 2;
+}
+
+message CommodityFilterRequest  {
+  int32 priceMin = 1;
+  int32 priceMax = 2;
+  bool  isHot = 3;
+  bool  isNew = 4;
+  bool  isTab = 5;
+  int32 topCategory = 6;
+  int32 pages = 7;
+  int32 pagePerNums = 8;
+  string keyWords = 9;
+  int32 brand = 10;
 }
