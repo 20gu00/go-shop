@@ -73,7 +73,7 @@ func (c *CommodityServer) UpdateBrand(ctx context.Context, req *pb.BrandReq) (*e
 		return nil, status.Errorf(codes.InvalidArgument, "品牌不存在")
 	}
 
-	// 可以更新品牌名称或者logo
+	// 可以更新品牌名称或者logo,避免用户输入空
 	if req.Name != "" {
 		brands.Name = req.Name
 	}
