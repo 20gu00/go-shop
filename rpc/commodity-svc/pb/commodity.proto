@@ -15,7 +15,7 @@ service Commodity{
   rpc UpdateCommodity(CreateCommodityReq)returns(google.protobuf.Empty);
   rpc GetCommodity(CommodityInfoReq)returns(CommodityInfoRes);
 
-  // 批量获取商品信息(比如一个订单中有多个商品,多个商品的id)
+  // 批量获取商品信息(比如一个订单中有多个商品,多个商品的id,勾选了多个商品,同时下单)
   rpc GetBatchCommodity(BatchCommodityIdInfo)returns(CommodityListRes);
 
 
