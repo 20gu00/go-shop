@@ -1,4 +1,4 @@
-package serivce
+package service
 
 import (
 	"commodity-rpc/pb"

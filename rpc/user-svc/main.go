@@ -49,7 +49,7 @@ func main() {
 	}
 
 	global.Init()
-	fmt.Println("11")
+	//fmt.Println("11")
 	// 创建server
 	server := grpc.NewServer()
 
