@@ -10,6 +10,7 @@ import (
 	"github.com/golang/protobuf/ptypes/empty"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type CommodityServer struct {
@@ -90,17 +91,6 @@ func (c *CommodityServer) CommodityList(ctx context.Context, req *pb.CommodityFi
 		// 商品表有个category_id
 		db = db.Where(fmt.Sprintf("category_id in (%s)", subQuery))
 
-		type Result struct {
-			ID int32
-		}
-		var results []Result
-		global.DB.Model(model.Category{}).Raw(subQuery).Scan(&results)
-		for _, re := range results {
-			categoryIds = append(categoryIds, re.ID)
-		}
-
-		//生成terms查询
-		q = q.Filter(elastic.NewTermsQuery("category_id", categoryIds...))
 	}
 
 	// count要在scope之前做,不然就是pagenum
@@ -118,6 +108,34 @@ func (c *CommodityServer) CommodityList(ctx context.Context, req *pb.CommodityFi
 	}
 
 	return CommodityListRes, nil
+}
+
+//获取商品详情
+func (c *CommodityServer) GetCommodity(ctx context.Context, req *pb.CommodityInfoReq) (*pb.CommodityInfoRes, error) {
+	var goods model.Commodity
+
+	if result := dao.DB.Preload("Category").Preload("Brands").First(&goods, req.Id); result.RowsAffected == 0 {
+		return nil, status.Errorf(codes.NotFound, "商品不存在")
+	}
+	goodsInfoResponse := ModelToResponse(goods)
+	return &goodsInfoResponse, nil
+}
+
+// 批量获取商品信息(比如一个订单中有多个商品,多个商品的id)
+func (c *CommodityServer) GetBatchCommodity(ctx context.Context, req *pb.BatchCommodityIdInfo) (*pb.CommodityListRes, error) {
+	CommodityListResponse := &pb.CommodityListRes{}
+	var commodity []model.Commodity
+
+	//First(&commodity,[]{1,2,3}) 批量查询
+	//Where([]{1,2,3})
+	//实际上sql就是主键id in (1,2,3)
+	result := dao.DB.Where(req.Id).Find(&commodity)
+	for _, good := range commodity {
+		goodsInfoResponse := ModelToResponse(good)
+		CommodityListResponse.Data = append(CommodityListResponse.Data, &goodsInfoResponse)
+	}
+	CommodityListResponse.Total = int32(result.RowsAffected)
+	return CommodityListResponse, nil
 }
 
 func ModelToResponse(commodity model.Commodity) pb.CommodityInfoRes {
@@ -154,44 +172,103 @@ func ModelToResponse(commodity model.Commodity) pb.CommodityInfoRes {
 }
 
 // 商品增删改查
-func (c *CommodityServer) CreateCommodity(context.Context, *pb.CreateCommodityReq) (*pb.CommodityInfoRes, error) {
+func (c *CommodityServer) CreateCommodity(ctx context.Context, req *pb.CreateCommodityReq) (*pb.CommodityInfoRes, error) {
+	var category model.Category
+	if result := dao.DB.First(&category, req.CategoryId); result.RowsAffected == 0 {
+		return nil, status.Errorf(codes.InvalidArgument, "商品分类不存在")
+	}
 
+	var brand model.Brand
+	if result := dao.DB.First(&brand, req.BrandId); result.RowsAffected == 0 {
+		return nil, status.Errorf(codes.InvalidArgument, "品牌不存在")
+	}
+	//先检查redis中是否有这个token
+	//防止同一个token的数据重复插入到数据库中，如果redis中没有这个token则放入redis
+	//这里没有看到图片文件是如何上传， 在微服务中 普通的文件上传已经不再使用
+	goods := model.Commodity{
+		// 外键部分
+		Brand:      brand,
+		BrandId:    brand.ID,
+		Category:   category,
+		CategoryId: category.ID,
+
+		Name:       req.Name,
+		Sn:         req.GoodsSn,
+		CommonPri:  req.MarketPrice,
+		LocalPri:   req.ShopPrice,
+		EasyDesc:   req.GoodsBrief,
+		IsFreeShip: req.ShipFree,
+		Images:     req.Images,
+		DescImages: req.DescImages,
+		FrontImage: req.GoodsFrontImage,
+		IsNew:      req.IsNew,
+		IsHot:      req.IsHot,
+		IsSale:     req.OnSale,
+	}
+
+	//srv之间互相调用了
+	// 写入的操作都要小心,要做事务,可能多个服务同时调用你这个服务
+	tx := dao.DB.Begin()
+	result := tx.Save(&goods)
+	if result.Error != nil {
+		tx.Rollback()
+		return nil, result.Error
+	}
+	tx.Commit()
+	return &pb.CommodityInfoRes{
+		Id: goods.ID,
+	}, nil
 }
 
 // 删除商品
-func (c *CommodityServer) DeleteCommodity(context.Context, *pb.DeleteCommodityInfo) (*empty.Empty, error) {
-
+func (c *CommodityServer) DeleteCommodity(ctx context.Context, req *pb.DeleteCommodityInfo) (*empty.Empty, error) {
+	if result := dao.DB.Delete(&model.Commodity{Base: model.Base{ID: req.Id}}, req.Id); result.Error != nil {
+		return nil, status.Errorf(codes.NotFound, "商品不存在")
+	}
+	return &emptypb.Empty{}, nil
 }
 
 // 更新商品
-func (c *CommodityServer) UpdateCommodity(context.Context, *pb.CreateCommodityReq) (*empty.Empty, error) {
-
-}
-
-//获取商品详情
-func (c *CommodityServer) GetCommodity(ctx context.Context, req *pb.CommodityInfoReq) (*pb.CommodityInfoRes, error) {
+func (c *CommodityServer) UpdateCommodity(ctx context.Context, req *pb.CreateCommodityReq) (*empty.Empty, error) {
 	var goods model.Commodity
 
-	if result := dao.DB.Preload("Category").Preload("Brands").First(&goods, req.Id); result.RowsAffected == 0 {
+	if result := dao.DB.First(&goods, req.Id); result.RowsAffected == 0 {
 		return nil, status.Errorf(codes.NotFound, "商品不存在")
 	}
-	goodsInfoResponse := ModelToResponse(goods)
-	return &goodsInfoResponse, nil
-}
 
-// 批量获取商品信息(比如一个订单中有多个商品,多个商品的id)
-func (c *CommodityServer) GetBatchCommodity(ctx context.Context, req *pb.BatchCommodityIdInfo) (*pb.CommodityListRes, error) {
-	CommodityListResponse := &pb.CommodityListRes{}
-	var commodity []model.Commodity
-
-	//First(&commodity,[]{1,2,3}) 批量查询
-	//Where([]{1,2,3})
-	//实际上sql就是主键id in (1,2,3)
-	result := dao.DB.Where(req.Id).Find(&commodity)
-	for _, good := range commodity {
-		goodsInfoResponse := ModelToResponse(good)
-		CommodityListResponse.Data = append(CommodityListResponse.Data, &goodsInfoResponse)
+	var category model.Category
+	if result := dao.DB.First(&category, req.CategoryId); result.RowsAffected == 0 {
+		return nil, status.Errorf(codes.InvalidArgument, "商品分类不存在")
 	}
-	CommodityListResponse.Total = int32(result.RowsAffected)
-	return CommodityListResponse, nil
+
+	var brand model.Brand
+	if result := dao.DB.First(&brand, req.BrandId); result.RowsAffected == 0 {
+		return nil, status.Errorf(codes.InvalidArgument, "品牌不存在")
+	}
+
+	goods.Brand = brand
+	goods.BrandId = brand.ID
+	goods.Category = category
+	goods.CategoryId = category.ID
+	goods.Name = req.Name
+	goods.Sn = req.GoodsSn
+	goods.CommonPri = req.MarketPrice
+	goods.LocalPri = req.ShopPrice
+	goods.EasyDesc = req.GoodsBrief
+	goods.IsFreeShip = req.ShipFree
+	goods.Images = req.Images
+	goods.DescImages = req.DescImages
+	goods.FrontImage = req.GoodsFrontImage
+	goods.IsNew = req.IsNew
+	goods.IsHot = req.IsHot
+	goods.IsSale = req.OnSale
+
+	tx := dao.DB.Begin()
+	result := tx.Save(&goods)
+	if result.Error != nil {
+		tx.Rollback()
+		return nil, result.Error
+	}
+	tx.Commit()
+	return &emptypb.Empty{}, nil
 }
