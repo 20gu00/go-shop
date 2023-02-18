@@ -201,7 +201,8 @@ message CommodityFilterReq {
   int32 topCategory=7;
   int32 pages=8;
   int32 pagePerNum=9;
-  string brand=10;
+  //品牌的id
+  int32 brand=10;
   // 搜索关键字
   string key=11;
 }
@@ -230,7 +231,7 @@ message CommodityInfoRes {
   bool freeShip=12;
   repeated string images=13;
   repeated string descImages=14;
-  string frontImage=15;
+  repeated string frontImage=15;
   bool new=16;
   bool hot=17;
   bool sale=18;

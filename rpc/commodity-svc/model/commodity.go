@@ -34,7 +34,7 @@ type Commodity struct {
 	SaleNum int32 `gorm:"type:int;default:0;not null"`
 
 	// 市场平时价格 本地价格
-	commonPri float32 `gorm:";not null"`
+	CommonPri float32 `gorm:";not null"`
 	LocalPri  float32 `gorm:"type:int;default:0;not null"`
 	// 简介的
 	EasyDesc string `gorm:"type:varchar(100);not null"`
