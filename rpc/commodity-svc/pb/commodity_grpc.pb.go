@@ -31,7 +31,7 @@ type CommodityClient interface {
 	DeleteCommodity(ctx context.Context, in *DeleteCommodityInfo, opts ...grpc.CallOption) (*empty.Empty, error)
 	UpdateCommodity(ctx context.Context, in *CreateCommodityReq, opts ...grpc.CallOption) (*empty.Empty, error)
 	GetCommodity(ctx context.Context, in *CommodityInfoReq, opts ...grpc.CallOption) (*CommodityInfoRes, error)
-	// 批量获取商品信息(比如一个订单中有多个商品,多个商品的id)
+	// 批量获取商品信息(比如一个订单中有多个商品,多个商品的id,勾选了多个商品,同时下单)
 	GetBatchCommodity(ctx context.Context, in *BatchCommodityIdInfo, opts ...grpc.CallOption) (*CommodityListRes, error)
 	// 商品分类 category服务
 	// 商品分类列表
@@ -39,7 +39,7 @@ type CommodityClient interface {
 	// 获取商品的子分类
 	SubCategoryList(ctx context.Context, in *CategoryListReq, opts ...grpc.CallOption) (*SubCategoryListRes, error)
 	// 商品分类的增删改
-	CreateCategory(ctx context.Context, in *CreateCommodityReq, opts ...grpc.CallOption) (*CategoryInfoRes, error)
+	CreateCategory(ctx context.Context, in *CategoryInfoReq, opts ...grpc.CallOption) (*CategoryInfoRes, error)
 	DeleteCategory(ctx context.Context, in *DeleteCategoryReq, opts ...grpc.CallOption) (*empty.Empty, error)
 	UpdateCategory(ctx context.Context, in *CategoryInfoReq, opts ...grpc.CallOption) (*empty.Empty, error)
 	//轮播图
@@ -141,7 +141,7 @@ func (c *commodityClient) SubCategoryList(ctx context.Context, in *CategoryListR
 	return out, nil
 }
 
-func (c *commodityClient) CreateCategory(ctx context.Context, in *CreateCommodityReq, opts ...grpc.CallOption) (*CategoryInfoRes, error) {
+func (c *commodityClient) CreateCategory(ctx context.Context, in *CategoryInfoReq, opts ...grpc.CallOption) (*CategoryInfoRes, error) {
 	out := new(CategoryInfoRes)
 	err := c.cc.Invoke(ctx, "/Commodity/CreateCategory", in, out, opts...)
 	if err != nil {
@@ -297,7 +297,7 @@ type CommodityServer interface {
 	DeleteCommodity(context.Context, *DeleteCommodityInfo) (*empty.Empty, error)
 	UpdateCommodity(context.Context, *CreateCommodityReq) (*empty.Empty, error)
 	GetCommodity(context.Context, *CommodityInfoReq) (*CommodityInfoRes, error)
-	// 批量获取商品信息(比如一个订单中有多个商品,多个商品的id)
+	// 批量获取商品信息(比如一个订单中有多个商品,多个商品的id,勾选了多个商品,同时下单)
 	GetBatchCommodity(context.Context, *BatchCommodityIdInfo) (*CommodityListRes, error)
 	// 商品分类 category服务
 	// 商品分类列表
@@ -305,7 +305,7 @@ type CommodityServer interface {
 	// 获取商品的子分类
 	SubCategoryList(context.Context, *CategoryListReq) (*SubCategoryListRes, error)
 	// 商品分类的增删改
-	CreateCategory(context.Context, *CreateCommodityReq) (*CategoryInfoRes, error)
+	CreateCategory(context.Context, *CategoryInfoReq) (*CategoryInfoRes, error)
 	DeleteCategory(context.Context, *DeleteCategoryReq) (*empty.Empty, error)
 	UpdateCategory(context.Context, *CategoryInfoReq) (*empty.Empty, error)
 	//轮播图
@@ -356,7 +356,7 @@ func (UnimplementedCommodityServer) AllCategoryList(context.Context, *empty.Empt
 func (UnimplementedCommodityServer) SubCategoryList(context.Context, *CategoryListReq) (*SubCategoryListRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SubCategoryList not implemented")
 }
-func (UnimplementedCommodityServer) CreateCategory(context.Context, *CreateCommodityReq) (*CategoryInfoRes, error) {
+func (UnimplementedCommodityServer) CreateCategory(context.Context, *CategoryInfoReq) (*CategoryInfoRes, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateCategory not implemented")
 }
 func (UnimplementedCommodityServer) DeleteCategory(context.Context, *DeleteCategoryReq) (*empty.Empty, error) {
@@ -562,7 +562,7 @@ func _Commodity_SubCategoryList_Handler(srv interface{}, ctx context.Context, de
 }
 
 func _Commodity_CreateCategory_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateCommodityReq)
+	in := new(CategoryInfoReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -574,7 +574,7 @@ func _Commodity_CreateCategory_Handler(srv interface{}, ctx context.Context, dec
 		FullMethod: "/Commodity/CreateCategory",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CommodityServer).CreateCategory(ctx, req.(*CreateCommodityReq))
+		return srv.(CommodityServer).CreateCategory(ctx, req.(*CategoryInfoReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }

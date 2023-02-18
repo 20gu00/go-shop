@@ -25,7 +25,7 @@ service Commodity{
   // 获取商品的子分类
   rpc SubCategoryList(CategoryListReq)returns(SubCategoryListRes);
   // 商品分类的增删改
-  rpc CreateCategory(CreateCommodityReq)returns(CategoryInfoRes);
+  rpc CreateCategory(CategoryInfoReq)returns(CategoryInfoRes);
   rpc DeleteCategory(DeleteCategoryReq)returns(google.protobuf.Empty);
   rpc UpdateCategory(CategoryInfoReq)returns(google.protobuf.Empty);
 
