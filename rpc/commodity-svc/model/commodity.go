@@ -9,11 +9,12 @@ import (
 
 // proto没有int 由int32 int64
 type Base struct {
-	ID        int32     `gorm:"primarykey;type:int"` // 如果由外键使用这个主键做关联,那么类型要一致  bigint
-	CreatedAt time.Time `gorm:"column:add_time"`
-	UpdatedAt time.Time `gorm:"column:update_time"`
-	DeletedAt gorm.DeletedAt
-	IsDelete  bool
+	ID        int32          `gorm:"primarykey;type:int"`      // 如果由外键使用这个主键做关联,那么类型要一致  bigint
+	CreatedAt time.Time      `gorm:"column:add_time" json:"-"` // json序列化的时候会忽略
+	UpdatedAt time.Time      `gorm:"column:update_time" json:"-"`
+	DeletedAt gorm.DeletedAt `json:"-"`
+	// 软删除
+	IsDelete bool `json:"-"`
 }
 
 // 商品表
@@ -67,6 +68,12 @@ type Category struct {
 	// 不可以循环嵌套
 	// 如果是自身,要使用指针
 	ParCategory *Category
+
+	// 一对多定义  多个子分类
+	// Category多表的struct名称
+	// 外键是多表的
+	// 关联自身这个一表的ID
+	SubCategory []*Category `gorm:"foreignKey:ParCategoryId;references:ID"`
 }
 
 // 品牌表
