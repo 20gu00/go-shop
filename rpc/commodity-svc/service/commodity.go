@@ -168,12 +168,30 @@ func (c *CommodityServer) UpdateCommodity(context.Context, *pb.CreateCommodityRe
 
 }
 
-//获取商品
-func (c *CommodityServer) GetCommodity(context.Context, *pb.CommodityInfoReq) (*pb.CommodityInfoRes, error) {
+//获取商品详情
+func (c *CommodityServer) GetCommodity(ctx context.Context, req *pb.CommodityInfoReq) (*pb.CommodityInfoRes, error) {
+	var goods model.Commodity
 
+	if result := dao.DB.Preload("Category").Preload("Brands").First(&goods, req.Id); result.RowsAffected == 0 {
+		return nil, status.Errorf(codes.NotFound, "商品不存在")
+	}
+	goodsInfoResponse := ModelToResponse(goods)
+	return &goodsInfoResponse, nil
 }
 
 // 批量获取商品信息(比如一个订单中有多个商品,多个商品的id)
-func (c *CommodityServer) GetBatchCommodity(context.Context, *pb.BatchCommodityIdInfo) (*pb.CommodityListRes, error) {
+func (c *CommodityServer) GetBatchCommodity(ctx context.Context, req *pb.BatchCommodityIdInfo) (*pb.CommodityListRes, error) {
+	CommodityListResponse := &pb.CommodityListRes{}
+	var commodity []model.Commodity
 
+	//First(&commodity,[]{1,2,3}) 批量查询
+	//Where([]{1,2,3})
+	//实际上sql就是主键id in (1,2,3)
+	result := dao.DB.Where(req.Id).Find(&commodity)
+	for _, good := range commodity {
+		goodsInfoResponse := ModelToResponse(good)
+		CommodityListResponse.Data = append(CommodityListResponse.Data, &goodsInfoResponse)
+	}
+	CommodityListResponse.Total = int32(result.RowsAffected)
+	return CommodityListResponse, nil
 }
