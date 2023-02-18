@@ -71,7 +71,7 @@ func (c *CommodityServer) CreateCategory(ctx context.Context, req *pb.CategoryIn
 	if req.Level != 1 {
 		cMap["parent_category_id"] = req.ParentCategory
 	}
-	tx := dao.DB.Model(&model.Category{}).Create(cMap)
+	dao.DB.Model(&model.Category{}).Create(cMap)
 	return &pb.CategoryInfoRes{Id: category.ID}, nil
 }
 

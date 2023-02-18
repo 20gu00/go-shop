@@ -22,7 +22,7 @@ func (c *CommodityServer) CommodityList(ctx context.Context, req *pb.CommodityFi
 	//列表过滤:关键词搜索、查询新品、查询热门商品、通过价格区间筛选， 通过商品分类筛选
 	CommodityListRes := &pb.CommodityListRes{}
 	commoditys := make([]model.Commodity, 0, 0)
-	query := map[string]interface{}{}
+	//query := map[string]interface{}{}
 
 	// map查询,弊端就是key=value这种形式,如果是价格区间,那么就是>或者<了
 	// 更灵活的方式是在前一个sql基础上进行sql而不是基于
@@ -67,7 +67,6 @@ func (c *CommodityServer) CommodityList(ctx context.Context, req *pb.CommodityFi
 	// select * from comodity where category_id in (select id from category where parent_category_id in (select id from category where parent_category_id=99999))
 
 	var subQuery string
-	categoryIds := make([]interface{}, 0)
 
 	// 有上层分类,上层分类的id
 	if req.TopCategory > 0 {
