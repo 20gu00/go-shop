@@ -82,10 +82,12 @@ func (StockSellDetail) TableName() string {
 	return "stockselldetail"
 }
 
+// 库存的历史记录,方便归还库存使用
 //type InventoryHistory struct {
 //	user int32
 //	goods int32
 //	nums int32
 //	order int32
+//比如可能因为网络原因,多次归还,这里就需要幂等性
 //	status int32 //1. 表示库存是预扣减， 幂等性， 2. 表示已经支付
 //}

@@ -19,6 +19,9 @@ service Inventory {
   rpc SetInv(GoodsInvInfo) returns(google.protobuf.Empty);
   // 库存详情
   rpc InvDetail(GoodsInvInfo) returns (GoodsInvInfo);
+
+  //库存扣减和归还是分布式操作 分布式事务重点内容
+
   // 扣减库存(下单的时候扣减,预扣库存)
   // 比如购物车中有多个订单都想下单,那么就应该多次扣减库存,也就是可以多次调用这个服务,但是有个问题就是如果其中有一次服务调用失败了呢,之前扣减少了的库存怎么办,这里就是分布式事务的问题了,多个进程间的分布式
   // 可以简单点,直接设置可以批量扣减库存,就是多个订单的商品id等信息都发过来,同时进行扣减库存,那么使用数据库事务即可保证库存扣减
