@@ -1,0 +1,28 @@
+syntax = "proto3";
+import "google/protobuf/empty.proto";
+option go_package = "./;pb";
+
+message GoodsInvInfo {
+  int32 goodsId = 1;
+  int32 num = 2;
+}
+
+message SellInfo {
+  repeated GoodsInvInfo goodsInfo = 1;
+  string orderSn = 2;
+}
+
+// 各个服务比如订单服务下单了等等都得调用相应的库存服务来设置库存
+
+service Inventory {
+  // 设置库存
+  rpc SetInv(GoodsInvInfo) returns(google.protobuf.Empty);
+  // 库存详情
+  rpc InvDetail(GoodsInvInfo) returns (GoodsInvInfo);
+  // 扣减库存(下单的时候扣减,预扣库存)
+  // 比如购物车中有多个订单都想下单,那么就应该多次扣减库存,也就是可以多次调用这个服务,但是有个问题就是如果其中有一次服务调用失败了呢,之前扣减少了的库存怎么办,这里就是分布式事务的问题了,多个进程间的分布式
+  // 可以简单点,直接设置可以批量扣减库存,就是多个订单的商品id等信息都发过来,同时进行扣减库存,那么使用数据库事务即可保证库存扣减
+  rpc Sell(SellInfo) returns (google.protobuf.Empty);
+  // 归还库存(订单超时,或者取消订单)
+  rpc Reback(SellInfo) returns(google.protobuf.Empty);
+}

@@ -50,9 +50,11 @@ func (g *GoodsDetailList) Scan(value interface{}) error {
 // 库存表,微服务,不同数据库了,不能做外键
 type Inventory struct {
 	BaseModel
-	Goods   int32 `gorm:"type:int;index"`
-	Stocks  int32 `gorm:"type:int"`
-	Version int32 `gorm:"type:int"` //分布式锁的乐观锁
+	Goods  int32 `gorm:"type:int;index"`
+	Stocks int32 `gorm:"type:int"`
+
+	//分布式锁的乐观锁
+	Version int32 `gorm:"type:int"`
 }
 
 type InventoryNew struct {

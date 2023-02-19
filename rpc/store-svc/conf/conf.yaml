@@ -1,0 +1,55 @@
+#程序
+app_name: "store-rpc"
+app_port: 50051
+app_host:
+
+mode: "dev"  #dev:日志输出到终端,开发格式的zap日志   prod:日志输出到文件,zap的生产格式日志
+read_timeout: 10
+write_timeout: 10
+max_header: 20
+version: "v1"
+start_time: "2023-02-10"
+machine_id: 1
+#mysql
+mysql:
+  mysql_addr: "127.0.0.1"
+  mysql_port: 13306
+  user_name: "root"
+  mysql_password: "Dl123456"
+  db_name: "go_shop_commodity"
+  max_connection: 100  #最大连接数
+  max_idle: 90  #最大空闲连接数
+
+#redis
+redis:
+  redis_addr: "127.0.0.1"
+  redis_port: 6379
+  redis_password: ""
+  db: 0
+  pool_size: 100  #连接池大小,数目
+  min_idle: 90  #最小空闲连接数
+
+#log
+log:
+  file_name: "./log/store-rpc.log"  #建议program_name
+  level: "info"  #debug warn info panic fatal dpanic
+  max_size: 200  #Mib
+  max_age: 10
+  max_backup: 10  #份
+  compress: true
+
+#jwt
+auth:
+  jwt_expire: 10
+
+#阿里云短信服务
+sms:
+  # key_id
+  key: "AccessKeyIdxxxxx"
+  key_secret: "AccessKeySecretxxxxx"
+
+  exp: 120
+
+consul:
+  host: "192.168.23.146"
+  port: 8500
