@@ -39,3 +39,24 @@ func (s *StoreServer) InvDetail(ctx context.Context, req *pb.GoodsInvInfo) (*pb.
 		Num:     inv.Stocks,
 	}, nil
 }
+
+// 扣减库存
+func (s *StoreServer) Sell(ctx context.Context, req *pb.SellInfo) (*emptypb.Empty, error) {
+	// 涉及本地事务和分布式事务
+	//本地事务,如果一个订单a商品库存扣减成功,b商品扣减失败比如库存不足
+	//这时候就不能成功下单支付,应该要么全部成功要么全部失败
+	for _, commodityInfo := range req.GoodsInfo {
+		var inv model.Inventory
+		if result := dao.DB.First(&inv, commodityInfo.GoodsId); result.RowsAffected {
+			return nil, status.Errorf(codes.NotFound, "没有该商品的库存库存信息")
+		}
+		// 库存不足
+		if inv.Stocks < commodityInfo.Num {
+			return nil, status.Errorf(codes.ResourceExhausted, "库存不足")
+		}
+
+		inv.Stocks -= commodityInfo.Num
+		dao.DB.Save(&inv)
+	}
+	return &emptypb.Empty{}, nil
+}
