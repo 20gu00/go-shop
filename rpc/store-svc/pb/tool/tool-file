@@ -1,1 +1,1 @@
-protoc --go_out=. --go_grpc_out=. store.proto
+protoc --go_out=. --go-grpc_out=. store.proto
