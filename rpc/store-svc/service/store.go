@@ -9,6 +9,7 @@ import (
 	"store-rpc/dao"
 	"store-rpc/model"
 	"store-rpc/pb"
+	"sync"
 )
 
 type StoreServer struct {
@@ -40,6 +41,9 @@ func (s *StoreServer) InvDetail(ctx context.Context, req *pb.GoodsInvInfo) (*pb.
 	}, nil
 }
 
+// 全局锁
+var mu sync.Mutex
+
 // 扣减库存
 func (s *StoreServer) Sell(ctx context.Context, req *pb.SellInfo) (*emptypb.Empty, error) {
 	// 涉及本地事务和分布式事务
@@ -50,6 +54,7 @@ func (s *StoreServer) Sell(ctx context.Context, req *pb.SellInfo) (*emptypb.Empt
 	//可以启动一个服务,里边并发调用这个扣减服务,也就是设置wg,wg.Add()和wg.Wait(),注意给并发逻辑的函数传递指针*wg,wg.Donw()
 
 	tx := dao.DB.Begin()
+	mu.Lock() //在查询和更新的逻辑之前上锁
 	for _, commodityInfo := range req.GoodsInfo {
 		var inv model.Inventory
 		if result := dao.DB.First(&inv, commodityInfo.GoodsId); result.RowsAffected {
@@ -64,6 +69,7 @@ func (s *StoreServer) Sell(ctx context.Context, req *pb.SellInfo) (*emptypb.Empt
 		dao.DB.Save(&inv)
 	}
 	tx.Commit()
+	mu.Unlock() //事务执行之后才释放锁
 	return &emptypb.Empty{}, nil
 }
 
@@ -74,6 +80,7 @@ func (s *StoreServer) Reback(ctx context.Context, req *pb.SellInfo) (*emptypb.Em
 	//3. 手动归还,用户取消
 	//批量归还,也就是一个订单中多个商品,不然一个一个归还容易涉及到分布式事务的问题
 	tx := dao.DB.Begin()
+	mu.Lock()
 	for _, goodInfo := range req.GoodsInfo {
 		var inv model.Inventory
 		if result := dao.DB.Where(&model.Inventory{Goods: goodInfo.GoodsId}).First(&inv); result.RowsAffected == 0 {
@@ -85,5 +92,6 @@ func (s *StoreServer) Reback(ctx context.Context, req *pb.SellInfo) (*emptypb.Em
 		tx.Save(&inv)
 	}
 	tx.Commit()
+	mu.Unlock()
 	return &emptypb.Empty{}, nil
 }
