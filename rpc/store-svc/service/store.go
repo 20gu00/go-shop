@@ -3,10 +3,10 @@ package service
 import (
 	"context"
 	"github.com/golang/protobuf/ptypes/empty"
+	"go.uber.org/zap"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
-	"gorm.io/gorm/clause"
 	"store-rpc/dao"
 	"store-rpc/model"
 	"store-rpc/pb"
@@ -59,17 +59,44 @@ func (s *StoreServer) Sell(ctx context.Context, req *pb.SellInfo) (*emptypb.Empt
 	for _, commodityInfo := range req.GoodsInfo {
 		var inv model.Inventory
 		//if result := dao.DB.First(&inv, commodityInfo.GoodsId); result.RowsAffected {
-		//更改成使用分布式锁
+
+		//更改成使用分布式锁(悲观锁)
 		//这样这条记录就会行锁了甚至表锁
-		if result := tx.Clauses(clause.Locking{Strength: "UPDATE"}).First(&inv, commodityInfo.GoodsId); result.RowsAffected == 0 {
-			return nil, status.Errorf(codes.NotFound, "没有该商品的库存库存信息")
+		//if result := tx.Clauses(clause.Locking{Strength: "UPDATE"}).First(&inv, commodityInfo.GoodsId); result.RowsAffected == 0 {
+		//	return nil, status.Errorf(codes.NotFound, "没有该商品的库存库存信息")
+		//}
+
+		//操作扣减库存失败就重试
+		for {
+			//乐观锁
+			if result := dao.DB.First(&inv, commodityInfo.GoodsId); result.RowsAffected == 0 {
+				return nil, status.Errorf(codes.NotFound, "没有该商品的库存库存信息")
+			}
+			// 库存不足(库存0的时候就会扣减失败)
+			if inv.Stocks < commodityInfo.Num {
+				return nil, status.Errorf(codes.ResourceExhausted, "库存不足")
+			}
+			tx.Rollback()
+
+			inv.Stocks -= commodityInfo.Num
+
+			//更改乐观锁字段
+			//tx.Model(&inv) inv赋值了,使用的话等于添加了查询条件
+			//version已经读取出来并解析到version中
+			//updates更新多个字段(结构体) update更新单个列字段key:value
+
+			//gorm的坑,数据类型的零值,这里是int也就是0,会忽略(比如库存为1,扣减了这里设置0,忽略)
+			//解决方法就是强制更新字段,也就是指定要强制更新的字段
+			//加上select()
+			//大写,结构体字段
+			if result := tx.Model(&model.Inventory{}).Select("Stocks", "Version").Where("goods=? and version = ?", commodityInfo.GoodsId, inv.Version).Updates(model.Inventory{Stocks: inv.Stocks, Version: inv.Version + 1}); result.RowsAffected == 0 {
+				zap.L().Info("库存扣减失败")
+				//重试
+			} else {
+				//退出循环
+				break
+			}
 		}
-		// 库存不足
-		if inv.Stocks < commodityInfo.Num {
-			return nil, status.Errorf(codes.ResourceExhausted, "库存不足")
-		}
-		tx.Rollback()
-		inv.Stocks -= commodityInfo.Num
 		dao.DB.Save(&inv)
 	}
 	tx.Commit()
