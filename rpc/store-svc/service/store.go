@@ -6,6 +6,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
+	"gorm.io/gorm/clause"
 	"store-rpc/dao"
 	"store-rpc/model"
 	"store-rpc/pb"
@@ -57,7 +58,10 @@ func (s *StoreServer) Sell(ctx context.Context, req *pb.SellInfo) (*emptypb.Empt
 	mu.Lock() //在查询和更新的逻辑之前上锁
 	for _, commodityInfo := range req.GoodsInfo {
 		var inv model.Inventory
-		if result := dao.DB.First(&inv, commodityInfo.GoodsId); result.RowsAffected {
+		//if result := dao.DB.First(&inv, commodityInfo.GoodsId); result.RowsAffected {
+		//更改成使用分布式锁
+		//这样这条记录就会行锁了甚至表锁
+		if result := tx.Clauses(clause.Locking{Strength: "UPDATE"}).First(&inv, commodityInfo.GoodsId); result.RowsAffected {
 			return nil, status.Errorf(codes.NotFound, "没有该商品的库存库存信息")
 		}
 		// 库存不足
