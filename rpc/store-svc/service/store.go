@@ -61,7 +61,7 @@ func (s *StoreServer) Sell(ctx context.Context, req *pb.SellInfo) (*emptypb.Empt
 		//if result := dao.DB.First(&inv, commodityInfo.GoodsId); result.RowsAffected {
 		//更改成使用分布式锁
 		//这样这条记录就会行锁了甚至表锁
-		if result := tx.Clauses(clause.Locking{Strength: "UPDATE"}).First(&inv, commodityInfo.GoodsId); result.RowsAffected {
+		if result := tx.Clauses(clause.Locking{Strength: "UPDATE"}).First(&inv, commodityInfo.GoodsId); result.RowsAffected == 0 {
 			return nil, status.Errorf(codes.NotFound, "没有该商品的库存库存信息")
 		}
 		// 库存不足
