@@ -15,5 +15,6 @@ go-shop，go开发的商城系统，分api层和rpc层，api层主要是用gin�
 - jwt 分布式架构中采用token来传递请求的用户信息比session机制好
 - 分布式锁
 - validator
+- 短信验证
 - docker 快速部署开发环境
 
