@@ -18,8 +18,8 @@ type StoreServer struct {
 // 设置库存
 func (s *StoreServer) SetInv(ctx context.Context, req *pb.GoodsInvInfo) (*empty.Empty, error) {
 	//有则更新,没有则创建
-
 	var inv model.Inventory
+	// First(&inv,req.GoodsId)  这就要设置Inventory的GoodsId为primarykey
 	dao.DB.Where(&model.Inventory{Goods: req.GoodsId}).First(&inv)
 	inv.Goods = req.GoodsId
 	inv.Stocks = req.Num
@@ -45,6 +45,11 @@ func (s *StoreServer) Sell(ctx context.Context, req *pb.SellInfo) (*emptypb.Empt
 	// 涉及本地事务和分布式事务
 	//本地事务,如果一个订单a商品库存扣减成功,b商品扣减失败比如库存不足
 	//这时候就不能成功下单支付,应该要么全部成功要么全部失败
+	//并发情况下可能会出现超卖,其实就是多个进程都去处理stock这个变量,哪怕是本地事务,本地事务只是保证了自身这个进程的完整执行,这就需要分布式事务
+
+	//可以启动一个服务,里边并发调用这个扣减服务,也就是设置wg,wg.Add()和wg.Wait(),注意给并发逻辑的函数传递指针*wg,wg.Donw()
+
+	tx := dao.DB.Begin()
 	for _, commodityInfo := range req.GoodsInfo {
 		var inv model.Inventory
 		if result := dao.DB.First(&inv, commodityInfo.GoodsId); result.RowsAffected {
@@ -54,9 +59,31 @@ func (s *StoreServer) Sell(ctx context.Context, req *pb.SellInfo) (*emptypb.Empt
 		if inv.Stocks < commodityInfo.Num {
 			return nil, status.Errorf(codes.ResourceExhausted, "库存不足")
 		}
-
+		tx.Rollback()
 		inv.Stocks -= commodityInfo.Num
 		dao.DB.Save(&inv)
 	}
+	tx.Commit()
+	return &emptypb.Empty{}, nil
+}
+
+func (s *StoreServer) Reback(ctx context.Context, req *pb.SellInfo) (*emptypb.Empty, error) {
+	//库存归还：
+	//1：订单超时归还
+	//2. 订单创建失败(创建订单的时候会先扣减库存,然后生成实际的订单存入数据库表中,如果扣减了库存,但是订单创建失败,那么也会归还库存)
+	//3. 手动归还,用户取消
+	//批量归还,也就是一个订单中多个商品,不然一个一个归还容易涉及到分布式事务的问题
+	tx := dao.DB.Begin()
+	for _, goodInfo := range req.GoodsInfo {
+		var inv model.Inventory
+		if result := dao.DB.Where(&model.Inventory{Goods: goodInfo.GoodsId}).First(&inv); result.RowsAffected == 0 {
+			tx.Rollback()
+			return nil, status.Errorf(codes.InvalidArgument, "没有库存信息")
+		}
+
+		inv.Stocks += goodInfo.Num
+		tx.Save(&inv)
+	}
+	tx.Commit()
 	return &emptypb.Empty{}, nil
 }

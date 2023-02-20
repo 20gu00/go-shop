@@ -9,6 +9,7 @@ import (
 	"google.golang.org/grpc/health"
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"net"
+	"os"
 	"os/signal"
 	"store-rpc/common/initDo"
 	"store-rpc/common/setUp/config"
@@ -40,7 +41,7 @@ func main() {
 	initDo.Init()
 
 	server := grpc.NewServer()
-	pb.RegisterCommodityServer(server, &service.CommodityServer{})
+	pb.RegisterInventoryServer(server, &service.StoreServer{})
 	srv := health.NewServer()
 	grpc_health_v1.RegisterHealthServer(server, srv)
 
@@ -57,7 +58,7 @@ func main() {
 	id := fmt.Sprintf("%s", uuid.NewV4())
 	registor.ID = id //config.Conf.Name
 	registor.Name = config.Conf.Name
-	registor.Tags = []string{"commodity-rpc"}
+	registor.Tags = []string{"store-rpc"}
 	// 注册的服务地址,注意要和下面的GRPC保持一致
 	// 可以通过环境变量获取
 	registor.Address = "192.168.23.146"
