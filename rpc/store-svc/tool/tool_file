@@ -66,3 +66,45 @@ update inv set stock=99,version=version+1 where commodityid=xxx and version=vers
 
 
 
+2.基于redis实现分布式锁
+https://github.com/go-redsync/redsync
+定义一个key,服务访问的时候发现这个key没有设置那么就设置这个key的value,也就是获得锁,其他服务访问redis发现key被设置了,就不能获得锁,然后就轮循等待
+完成了业务逻辑就释放锁,也就是删除key
+需要setnx,也就是查询和设置一块做,确保原子性
+setnx成功返回1,失败返回0
+问题:
+1.如果设置了锁,但是来不及释放锁就挂掉了,后续的服务一直拿不到锁,也就是死锁
+解决方法,设置过期时间,但是如果业务还没执行完,锁就过期了,所以可以通过一个goroutine去刷新锁,也就是延时过期时间,但是还有问题,就是你hung住了,又不断刷新锁,导致别人申请不到锁
+2.分布式锁的互斥性和死锁上面解决了,但是安全性,也就是锁应该只有上锁人也就是持有锁的才能解锁
+解决方法就是拿到这个锁的key的值(随机值)和自己保存的值对比,一样才能删除,也就是持有锁的才能删除(场景就是服务a拿到锁但是过期了,别的服务就可以进来了,然后可以删除锁也就是进行redis命令行操作)
+
+红锁redlock
+如果是redis集群,服务可能从这个slave读取也就是获取所,也可能从另一个slave读取,对于写的时候会写master,集群内不会同步
+但是如果master宕机了(网络故障,网络延迟,跟某台slave来不及同步,高并发下),数据来不及写来不及同步,slave来不及同步数据,服务b访问到某个未同步的slave,发现key没有被设置,那么也去获取锁,也就是设置写入锁
+
+因此使用redlock,其实就是setnx要在所有的master和slave都执行才行,但是也有个情况,可能服务a setnx了一部分机器,服务b也来设置了一部分的机器了,所以这时候就看谁设置了n/2+1太,就是看谁设置的多谁就设置成功,所以redis集群一般都是奇数
+
+
+
+使用的:
+建立redis连接也就是拿到一个连接redis的client:
+redis.NewClient()
+当然也可以根据这个client建立连接池:
+pool:=goredis.NewPool(client)  (redis本身连接就会维持一套连接池)
+根据连接池创建一个redsync:
+rs:=redsync.New(pool)
+定义红锁的名称,也就是雨荨有多个红锁:
+muName:="test"
+mutex:=rs.NewMutex(muName)
+在业务逻辑中也就是redis的资源 命令操作时上锁和解锁:
+mutex.Lock()
+mutex.Unlock()
+
+
+
+
+
+
+
+github.com/go-redsync/redsync/v4
+github.com/go-redsync/redsync/v4/redis/goredis/v8
